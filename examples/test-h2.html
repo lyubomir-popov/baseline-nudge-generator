@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test H2 - 2rem/2rem</title>
+    
+    <!-- Load Inter font from Google Fonts -->
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+        
+        :root {
+            --baseline-unit: 0.5rem;
+            --font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        /* Baseline grid background */
+        .baseline-grid {
+            background-image: linear-gradient(
+                to bottom,
+                rgba(255, 0, 0, 0.3) 0px,
+                rgba(255, 0, 0, 0.3) 1px,
+                transparent 1px,
+                transparent var(--baseline-unit)
+            );
+            background-size: 100% var(--baseline-unit);
+            background-position: 0 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            line-height: 1.5;
+            color: #333;
+            min-height: 100vh;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-h2 {
+            font-size: 2rem;
+            line-height: 2rem;
+            padding-top: 0.272rem; /* Expected value from portfolio */
+            margin-bottom: 0.728rem; /* 1rem - 0.272rem */
+            font-family: var(--font-family);
+        }
+    </style>
+</head>
+<body>
+    <h2 class="test-h2">Test H2 with 2rem/2rem</h2>
+
+    <script>
+        // Font metrics from Inter font file (actual values)
+        const FONT_METRICS = {
+            ascent: 1984,
+            descent: -494,
+            lineGap: 0,
+            unitsPerEm: 2048,
+            capHeight: 1490,
+            xHeight: 1118
+        };
+
+        // Test configuration
+        const config = {
+            baselineUnit: 0.5,
+            elements: [
+                { classname: "h2", fontSize: 2, lineHeight: 4 } // 4 baseline units = 2rem
+            ]
+        };
+
+        // Calculate nudge using our current logic
+        function calculateNudge(fontSize, lineHeight, baselineUnit, metrics) {
+            const fontSizeInPixels = fontSize * 16;
+            const lineHeightInPixels = lineHeight * baselineUnit * 16;
+            
+            const ascentRatio = metrics.ascent / metrics.unitsPerEm;
+            const descentRatio = Math.abs(metrics.descent) / metrics.unitsPerEm;
+            
+            const leadingTop = (lineHeightInPixels - fontSizeInPixels) / 2;
+            const baselineFromTop = leadingTop + (fontSizeInPixels * ascentRatio);
+            
+            const baselineUnitInPixels = baselineUnit * 16;
+            const gridPosition = Math.ceil(baselineFromTop / baselineUnitInPixels) * baselineUnitInPixels;
+            const nudge = gridPosition - baselineFromTop;
+            
+            return nudge / 16;
+        }
+
+        // Calculate nudge using the working logic from generate-nudges.cjs
+        function calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnitRem) {
+            const ascenderRem = FONT_METRICS.ascent * fontSizeRem / FONT_METRICS.unitsPerEm;
+            const descenderRem = Math.abs(FONT_METRICS.descent) * fontSizeRem / FONT_METRICS.unitsPerEm;
+            const lineGapRem = FONT_METRICS.lineGap * fontSizeRem / FONT_METRICS.unitsPerEm;
+            
+            const effectiveAscenderRem = ascenderRem + lineGapRem;
+            const effectiveDescenderRem = descenderRem;
+            const contentAreaRem = effectiveAscenderRem + effectiveDescenderRem;
+            
+            const lineHeightAbsoluteRem = lineHeightRem * baselineUnitRem;
+            const leadingRem = lineHeightAbsoluteRem - contentAreaRem;
+            const baselineOffsetRem = leadingRem / 2 + effectiveAscenderRem;
+            const gridSizeRem = baselineUnitRem;
+            const nudgeRem = (Math.ceil(baselineOffsetRem / gridSizeRem) * gridSizeRem) - baselineOffsetRem;
+            
+            return Math.round(nudgeRem * 1000) / 1000;
+        }
+
+        // Test the calculation
+        function testCalculation() {
+            const fontSize = 2; // 2rem
+            const lineHeight = 4; // 4 baseline units = 2rem
+            const baselineUnit = 0.5;
+            
+            console.log('=== Testing H2: 2rem font-size, 2rem line-height ===');
+            console.log('Expected nudgeTop: 0.272rem');
+            
+            const nudgeOurMethod = calculateNudge(fontSize, lineHeight, baselineUnit, FONT_METRICS);
+            const nudgeWorkingMethod = calculateNudgeRem(fontSize, lineHeight, baselineUnit);
+            
+            console.log(`Our method nudge: ${nudgeOurMethod.toFixed(3)}rem`);
+            console.log(`Working method nudge: ${nudgeWorkingMethod.toFixed(3)}rem`);
+            console.log(`Expected nudge: 0.272rem`);
+            console.log(`Our method difference: ${Math.abs(nudgeOurMethod - 0.272).toFixed(3)}rem`);
+            console.log(`Working method difference: ${Math.abs(nudgeWorkingMethod - 0.272).toFixed(3)}rem`);
+            
+            // Apply the working method to the element
+            const nudge = Math.max(0, nudgeWorkingMethod);
+            const spaceAfter = 2 * baselineUnit; // 1rem
+            const marginBottom = spaceAfter - nudge;
+            
+            const element = document.querySelector('.test-h2');
+            element.style.paddingTop = `${nudge}rem`;
+            element.style.marginBottom = `${marginBottom}rem`;
+            
+            console.log(`Applied: padding-top: ${nudge.toFixed(3)}rem, margin-bottom: ${marginBottom.toFixed(3)}rem`);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enable grid
+            document.body.classList.add('baseline-grid');
+            
+            // Test calculation
+            testCalculation();
+            
+            console.log('Font loaded:', document.fonts.check('1em Inter'));
+        });
+    </script>
+</body>
+</html> 

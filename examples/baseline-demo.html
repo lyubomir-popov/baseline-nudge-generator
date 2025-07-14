@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseline Nudge Demo</title>
+    
+    <!-- Load Inter font from Google Fonts (legal, always available) -->
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+        
+        :root {
+            --baseline-unit: 0.5rem;
+            --font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        /* Baseline grid background */
+        .baseline-grid {
+            background-image: linear-gradient(
+                to bottom,
+                rgba(255, 0, 0, 0.3) 0px,
+                rgba(255, 0, 0, 0.3) 1px,
+                transparent 1px,
+                transparent var(--baseline-unit)
+            );
+            background-size: 100% var(--baseline-unit);
+            background-position: 0 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            line-height: 1.5;
+            color: #333;
+            min-height: 100vh;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="baseline-grid">
+    <div id="typography-elements"></div>
+
+    <script>
+        // Font metrics from Inter font file (actual values)
+        const FONT_METRICS = {
+            ascent: 1984,
+            descent: -494,
+            lineGap: 0,
+            unitsPerEm: 2048,
+            capHeight: 1490,
+            xHeight: 1118
+        };
+
+        // Calculate nudge value using the correct method
+        function calculateNudge(fontSize, lineHeight, baselineUnit, metrics) {
+            const fontSizeRem = fontSize;
+            const lineHeightRem = lineHeight;
+            const baselineUnitRem = baselineUnit;
+            
+            const ascenderRem = metrics.ascent * fontSizeRem / metrics.unitsPerEm;
+            const descenderRem = Math.abs(metrics.descent) * fontSizeRem / metrics.unitsPerEm;
+            const lineGapRem = metrics.lineGap * fontSizeRem / metrics.unitsPerEm;
+            
+            const effectiveAscenderRem = ascenderRem + lineGapRem;
+            const effectiveDescenderRem = descenderRem;
+            const contentAreaRem = effectiveAscenderRem + effectiveDescenderRem;
+            
+            const lineHeightAbsoluteRem = lineHeightRem * baselineUnitRem;
+            const leadingRem = lineHeightAbsoluteRem - contentAreaRem;
+            const baselineOffsetRem = leadingRem / 2 + effectiveAscenderRem;
+            const gridSizeRem = baselineUnitRem;
+            const nudgeRem = (Math.ceil(baselineOffsetRem / gridSizeRem) * gridSizeRem) - baselineOffsetRem;
+            
+            return Math.round(nudgeRem * 1000) / 1000;
+        }
+
+        // Generate tokens from config
+        function generateTokens(config) {
+            const tokens = {};
+            
+            config.elements.forEach(element => {
+                const fontSize = element.fontSize;
+                const lineHeight = element.lineHeight * config.baselineUnit;
+                const spaceAfter = 2 * config.baselineUnit; // Default to 2*baselineUnit as requested
+                const nudge = calculateNudge(fontSize, element.lineHeight, config.baselineUnit, FONT_METRICS);
+                
+                tokens[element.classname] = {
+                    fontSize: `${fontSize}rem`,
+                    lineHeight: `${lineHeight}rem`,
+                    spaceAfter: `${spaceAfter}rem`,
+                    nudgeTop: `${Math.max(0, nudge).toFixed(3)}rem`,
+                    paddingTop: `${Math.max(0, nudge).toFixed(3)}rem`,
+                    marginBottom: `${Math.max(0, spaceAfter - nudge).toFixed(3)}rem`
+                };
+            });
+            
+            return tokens;
+        }
+
+        // Apply styles to elements
+        function applyStyles(tokens) {
+            const container = document.getElementById('typography-elements');
+            container.innerHTML = '';
+            
+            Object.entries(tokens).forEach(([className, values]) => {
+                const element = document.createElement(className);
+                element.textContent = `This is a ${className} element aligned to the baseline grid`;
+                
+                // Apply calculated styles
+                element.style.fontSize = values.fontSize;
+                element.style.lineHeight = values.lineHeight;
+                element.style.paddingTop = values.paddingTop;
+                element.style.marginBottom = values.marginBottom;
+                element.style.fontFamily = 'var(--font-family)';
+                
+                container.appendChild(element);
+            });
+        }
+
+        // Load configuration and initialize
+        async function loadConfig() {
+            try {
+                const response = await fetch('./typography-config.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const config = await response.json();
+                
+                // Update CSS custom property
+                document.documentElement.style.setProperty('--baseline-unit', `${config.baselineUnit}rem`);
+                
+                // Generate and apply tokens
+                const tokens = generateTokens(config);
+                applyStyles(tokens);
+                
+                console.log('Generated tokens:', tokens);
+                
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', loadConfig);
+    </script>
+</body>
+</html> 
