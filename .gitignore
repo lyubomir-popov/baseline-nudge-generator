@@ -3,10 +3,11 @@ node_modules/
 
 # Font files (excluded due to licensing)
 font/
+# But allow Inter font for demo
+!examples/Inter-Regular.woff2
 
 # Generated files during testing
 test-*.json
-typography-config*.json
 example-*.json
 index.html
 tokens.json
