@@ -14,10 +14,14 @@
   ],
   "scripts": {
     "start": "node bin/baseline-nudges.js",
-    "dev": "concurrently \"cd examples && python3 -m http.server 8001\" \"node bin/baseline-nudges.js watch examples/typography-config.json\"",
+    "dev": "npm run ensure-font && concurrently \"npm run serve\" \"npm run watch\"",
     "watch": "node bin/baseline-nudges.js watch examples/typography-config.json",
-    "serve": "python3 -m http.server 8000",
-    "demo": "echo 'Starting demo server...' && echo 'Open http://localhost:8000/index.html' && python3 -m http.server 8000"
+    "serve": "cd examples && python3 -m http.server 8001",
+    "ensure-font": "node scripts/download-inter.js",
+    "build": "echo 'No build step needed'",
+    "test": "echo 'No tests yet'",
+    "prepublishOnly": "npm run build",
+    "postinstall": "npm run ensure-font"
   },
   "keywords": [
     "typography",
@@ -41,12 +45,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lyubomir/baseline-nudge-generator.git"
+    "url": "https://github.com/lyubomir-popov/baseline-nudge-generator.git"
   },
   "bugs": {
-    "url": "https://github.com/lyubomir/baseline-nudge-generator/issues"
+    "url": "https://github.com/lyubomir-popov/baseline-nudge-generator/issues"
   },
-  "homepage": "https://github.com/lyubomir/baseline-nudge-generator#readme",
+  "homepage": "https://github.com/lyubomir-popov/baseline-nudge-generator#readme",
   "devDependencies": {
     "@fontsource/inter": "^5.2.6"
   }
