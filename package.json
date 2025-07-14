@@ -15,9 +15,10 @@
   ],
   "scripts": {
     "start": "node bin/baseline-nudges.js",
-    "dev": "npm run ensure-font && concurrently \"npm run serve\" \"npm run watch\"",
+    "dev": "npm run ensure-font && concurrently \"npm run serve\" \"npm run watch\" \"npm run refresh\"",
     "watch": "node bin/baseline-nudges.js watch examples/typography-config.json",
     "serve": "cd examples && python3 -m http.server 8001",
+    "refresh": "node scripts/browser-refresh.js",
     "ensure-font": "node scripts/download-inter.js",
     "build": "echo 'No build step needed'",
     "test": "echo 'No tests yet'",

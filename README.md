@@ -48,6 +48,7 @@ This will:
 - Start a Python HTTP server on `http://localhost:8001`
 - Watch `examples/typography-config.json` for changes
 - Automatically regenerate tokens and CSS when config changes
+- **Auto-refresh browser** when changes are detected
 - Serve the demo page with baseline grid overlay
 
 ### Demo Configuration
@@ -87,9 +88,10 @@ The demo page (`examples/index.html`) includes:
 ### Available Scripts
 
 ```bash
-npm run dev      # Start server + watcher (development)
+npm run dev      # Start server + watcher + browser refresh (development)
 npm run watch    # Watch config file for changes
 npm run serve    # Start HTTP server only
+npm run refresh  # Browser refresh watcher only
 npm start        # Run CLI tool
 ```
 
