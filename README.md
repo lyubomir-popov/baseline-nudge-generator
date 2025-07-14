@@ -26,6 +26,73 @@ Or for local project use:
 npm install --save-dev @lyubomir-popov/baseline-nudge-generator
 ```
 
+## Development Workflow
+
+### Local Development
+
+For development and testing with the included demo:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd baseline-nudge-generator
+
+# Install dependencies
+npm install
+
+# Start development server with file watcher
+npm run dev
+```
+
+This will:
+- Start a Python HTTP server on `http://localhost:8001`
+- Watch `examples/typography-config.json` for changes
+- Automatically regenerate tokens and CSS when config changes
+- Serve the demo page with baseline grid overlay
+
+### Demo Configuration
+
+The project includes a working demo in the `examples/` directory:
+
+```json
+{
+  "font": "Inter",
+  "baselineUnit": 0.5,
+  "fontFile": "Inter-Regular.woff2",
+  "elements": [
+    { "classname": "h1", "fontSize": 5, "lineHeight": 11 },
+    { "classname": "h2", "fontSize": 3.5, "lineHeight": 8 },
+    { "classname": "h3", "fontSize": 3, "lineHeight": 7 },
+    { "classname": "h4", "fontSize": 2.5, "lineHeight": 6 },
+    { "classname": "h5", "fontSize": 2, "lineHeight": 5 },
+    { "classname": "h6", "fontSize": 1.5, "lineHeight": 4 },
+    { "classname": "p", "fontSize": 1, "lineHeight": 3 }
+  ]
+}
+```
+
+**Automatic Font Download**: The Inter font file is automatically downloaded during `npm install` and `npm run dev`.
+
+### Demo Features
+
+The demo page (`examples/index.html`) includes:
+- **Clean typography display** - Only h1-h6 and p elements (no classes)
+- **Baseline grid overlay** - Always visible red lines every 0.5rem
+- **Dynamic CSS generation** - Reads from `tokens.json` and applies styles
+- **Real font metrics** - Uses actual Inter font file for calculations
+- **Automatic setup** - Font downloaded automatically, ready to use out of the box
+
+> **Note:** The demo uses only element selectors (h1-h6, p) for clarity and simplicity. However, the configuration format supports both element names (e.g. "h1") and custom class names (e.g. ".my-heading").
+
+### Available Scripts
+
+```bash
+npm run dev      # Start server + watcher (development)
+npm run watch    # Watch config file for changes
+npm run serve    # Start HTTP server only
+npm start        # Run CLI tool
+```
+
 ## Quick Start Guide
 
 ### 1. Create a test project
@@ -55,23 +122,7 @@ This creates a `typography-config.json` file:
     { "classname": "h4", "fontSize": 2.5, "lineHeight": 5.5 },
     { "classname": "h5", "fontSize": 2, "lineHeight": 4.5 },
     { "classname": "h6", "fontSize": 1.5, "lineHeight": 4 },
-    { "classname": "p", "fontSize": 1, "lineHeight": 3 },
-    { "classname": "small", "fontSize": 0.875, "lineHeight": 2 }
-  ]
-}
-```
-
-**Custom classnames example:**
-```json
-{
-  "font": "Inter",
-  "baselineUnit": 0.5,
-  "fontFile": "your-font.woff2",
-  "elements": [
-    { "classname": "hero-title", "fontSize": 5, "lineHeight": 10 },
-    { "classname": "section-heading", "fontSize": 2.5, "lineHeight": 5 },
-    { "classname": "body-text", "fontSize": 1, "lineHeight": 3 },
-    { "classname": ".caption", "fontSize": 0.75, "lineHeight": 2 }
+    { "classname": "p", "fontSize": 1, "lineHeight": 3 }
   ]
 }
 ```
@@ -161,15 +212,12 @@ The tool accepts a JSON configuration with:
       "classname": "p",
       "fontSize": 1,
       "lineHeight": 3
-    },
-    {
-      "classname": "small",
-      "fontSize": 0.875,
-      "lineHeight": 2
     }
   ]
 }
 ```
+
+> **Note:** The `classname` field can be either an HTML element name (e.g. "h1", "p") or a custom class name (e.g. ".my-heading"). The demo uses only element names for simplicity, but the generator supports both.
 
 **Key points:**
 - `fontSize` is in rem units
@@ -227,11 +275,11 @@ The tool looks for your font file in this order:
 ```
 
 ### index.html
-Complete HTML example with:
-- All typography elements applied
-- Baseline grid overlay (red lines, toggleable)
-- Visual debugging information showing calculated values
-- Font metrics information panel
+Clean HTML example with:
+- All typography elements (h1-h6, p) applied
+- Baseline grid overlay (red lines every 0.5rem, always visible)
+- Dynamic CSS generation from tokens.json
+- Real font metrics from font file
 - Proper baseline alignment demonstration
 
 ### _generated-nudges.scss (Legacy Mode)
