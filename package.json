@@ -21,8 +21,7 @@
     "ensure-font": "node scripts/download-inter.js",
     "build": "echo 'No build step needed'",
     "test": "echo 'No tests yet'",
-    "prepublishOnly": "npm run build",
-    "postinstall": "npm run ensure-font"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "typography",
