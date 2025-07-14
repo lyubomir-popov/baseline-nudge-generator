@@ -16,8 +16,8 @@ class BaselineNudgeGenerator {
         descent: font.tables.hhea.descender,
         lineGap: font.tables.hhea.lineGap,
         unitsPerEm: font.unitsPerEm,
-        capHeight: font.tables.os2.sCapHeight || font.tables.hhea.ascender * 0.7,
-        xHeight: font.tables.os2.sxHeight || font.tables.hhea.ascender * 0.5
+        capHeight: (font.tables.os2 && font.tables.os2.sCapHeight) || font.tables.hhea.ascender * 0.7,
+        xHeight: (font.tables.os2 && font.tables.os2.sxHeight) || font.tables.hhea.ascender * 0.5
       };
       console.log(`✅ Loaded font metrics from: ${path.basename(fontPath)}`);
       console.log(`   Ascent: ${metrics.ascent}, Descent: ${metrics.descent}, UnitsPerEm: ${metrics.unitsPerEm}`);
@@ -481,8 +481,8 @@ Please ensure your font file is in the same directory as your config file.`);
             descent: font.tables.hhea.descender,
             lineGap: font.tables.hhea.lineGap,
             unitsPerEm: font.unitsPerEm,
-            capHeight: font.tables.os2.sCapHeight || font.tables.hhea.ascender * 0.7,
-            xHeight: font.tables.os2.sxHeight || font.tables.hhea.ascender * 0.5
+            capHeight: (font.tables.os2 && font.tables.os2.sCapHeight) || font.tables.hhea.ascender * 0.7,
+            xHeight: (font.tables.os2 && font.tables.os2.sxHeight) || font.tables.hhea.ascender * 0.5
           };
           console.log(`✅ Loaded font metrics from: ${path.basename(fontPath)}`);
           console.log(`   Ascent: ${this.fontMetrics.ascent}, Descent: ${this.fontMetrics.descent}, UnitsPerEm: ${this.fontMetrics.unitsPerEm}`);
