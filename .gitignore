@@ -2,9 +2,7 @@
 node_modules/
 
 # Font files (excluded due to licensing)
-font/
-# But allow Inter font for demo
-!examples/Inter-Regular.woff2
+fonts/
 
 # Generated files during testing
 test-*.json
@@ -12,6 +10,13 @@ example-*.json
 index.html
 tokens.json
 _generated-nudges.scss
+
+# Config test files (keep only the main typography-config.json)
+config/*-config.json
+!config/typography-config.json
+
+# Generated demos
+generated/
 
 # System files
 .DS_Store

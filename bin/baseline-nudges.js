@@ -19,6 +19,7 @@ Usage:
   baseline-nudges watch <config.json> [output.scss]
   baseline-nudges init [name]
   baseline-nudges init-legacy [name]
+  baseline-nudges decompress-woff2 <input.woff2> [output.ttf]
 
 Commands:
   generate        Generate JSON tokens and HTML example from new format
@@ -26,10 +27,17 @@ Commands:
   watch           Watch legacy configuration file and regenerate on changes
   init            Create example configuration file (new format)
   init-legacy     Create example configuration file (legacy format)
+  decompress-woff2 Decompress WOFF2 file to TTF for opentype.js compatibility
 
 Options:
   -h, --help     Show this help message
   -v, --version  Show version number
+
+Font Format Support:
+  ✅ TTF (TrueType) - Full support
+  ✅ OTF (OpenType) - Full support  
+  ✅ WOFF (Web Open Font Format) - Full support
+  ⚠️  WOFF2 - Automatic decompression to TTF (requires wawoff2)
 
 Examples:
   baseline-nudges generate typography.json
@@ -37,6 +45,7 @@ Examples:
   baseline-nudges generate-legacy typography.json _nudges.scss
   baseline-nudges init
   baseline-nudges init my-typography
+  baseline-nudges decompress-woff2 font.woff2 font.ttf
 `);
 }
 
@@ -196,8 +205,14 @@ async function main() {
       
       const outputDir = args[2] || path.dirname(inputPath);
       
+      const parserArgIndex = process.argv.indexOf('--parser');
+      let parser = 'opentype';
+      if (parserArgIndex !== -1 && process.argv[parserArgIndex + 1]) {
+        parser = process.argv[parserArgIndex + 1];
+      }
+
       try {
-        const generator = new BaselineNudgeGenerator();
+        const generator = new BaselineNudgeGenerator(null, parser);
         await generator.generateFiles(inputPath, outputDir);
         console.log('🎉 Generation complete!');
         console.log(`📁 Output directory: ${outputDir}`);
@@ -250,6 +265,29 @@ async function main() {
           process.exit(0);
         });
         
+      } catch (error) {
+        console.error('❌ Error:', error.message);
+        process.exit(1);
+      }
+      break;
+    }
+    
+    case 'decompress-woff2': {
+      const inputPath = args[1];
+      if (!inputPath) {
+        console.error('❌ Error: Input WOFF2 file required');
+        console.log('Usage: baseline-nudges decompress-woff2 <input.woff2> [output.ttf]');
+        process.exit(1);
+      }
+
+      const outputPath = args[2] || path.join(path.dirname(inputPath), 'decompressed.ttf');
+
+      try {
+                 const { decompressWOFF2 } = require('../scripts/decompress-woff2.js');
+         await decompressWOFF2(inputPath, outputPath);
+        console.log('🎉 WOFF2 decompression complete!');
+        console.log(`📁 Output directory: ${path.dirname(outputPath)}`);
+        console.log(`📄 Decompressed file: ${outputPath}`);
       } catch (error) {
         console.error('❌ Error:', error.message);
         process.exit(1);

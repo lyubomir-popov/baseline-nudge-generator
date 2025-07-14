@@ -19,7 +19,8 @@
     "watch": "node bin/baseline-nudges.js watch examples/typography-config.json",
     "serve": "cd examples && python3 -m http.server 8001",
     "refresh": "node scripts/browser-refresh.js",
-    "ensure-font": "node scripts/download-inter.js",
+    "downloadDefaultFont": "node scripts/downloadDefaultFont.js",
+
     "build": "echo 'No build step needed'",
     "test": "echo 'No tests yet'",
     "prepublishOnly": "npm run build"
@@ -39,7 +40,10 @@
   "dependencies": {
     "chokidar": "^3.5.3",
     "concurrently": "^8.2.2",
-    "opentype.js": "^1.3.4"
+    "fontkit": "^2.0.4",
+    "opentype.js": "^1.3.4",
+    "puppeteer": "^24.12.1",
+    "wawoff2": "^2.0.1"
   },
   "engines": {
     "node": ">=14.0.0"

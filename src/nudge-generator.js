@@ -1,50 +1,258 @@
 const fs = require('fs');
 const path = require('path');
+const fontkitParser = require('./fontkit-parser');
 const opentype = require('opentype.js');
 
 class BaselineNudgeGenerator {
-  constructor(fontMetrics = null) {
+  constructor(fontMetrics = null, parser = 'fontkit') {
     this.fontMetrics = fontMetrics;
+    this.parser = parser;
   }
 
-  // Read font metrics from a font file
+
+
   async readFontMetrics(fontPath) {
-    try {
-      const font = await opentype.load(fontPath);
-      const metrics = {
-        ascent: font.tables.hhea.ascender,
-        descent: font.tables.hhea.descender,
-        lineGap: font.tables.hhea.lineGap,
-        unitsPerEm: font.unitsPerEm,
-        capHeight: (font.tables.os2 && font.tables.os2.sCapHeight) || font.tables.hhea.ascender * 0.7,
-        xHeight: (font.tables.os2 && font.tables.os2.sxHeight) || font.tables.hhea.ascender * 0.5
-      };
-      console.log(`✅ Loaded font metrics from: ${path.basename(fontPath)}`);
-      console.log(`   Ascent: ${metrics.ascent}, Descent: ${metrics.descent}, UnitsPerEm: ${metrics.unitsPerEm}`);
-      return metrics;
-    } catch (error) {
-      throw new Error(`Could not read font metrics from ${fontPath}: ${error.message}`);
+    // Use fontkit as the default parser
+    return await fontkitParser.readFontMetrics(fontPath);
+  }
+
+  // Comprehensive font name extraction from metadata
+  async extractFontName(font, fontPath) {
+    let fontName = null;
+    
+    // Method 1: Try fontkit name table with multiple API variations
+    if (font.tables && font.tables.name) {
+      const nameTable = font.tables.name;
+      
+      // Try different fontkit API variations
+      const nameExtractionMethods = [
+        // Modern API: nameTable.names array
+        () => {
+          if (nameTable.names && Array.isArray(nameTable.names)) {
+            // Priority order for name IDs: 1 (Family), 4 (Full), 6 (PostScript), 16 (Typographic Family)
+            const priorityNameIDs = [1, 4, 6, 16];
+            
+            for (const nameID of priorityNameIDs) {
+              // Try Windows platform first (most common)
+              const windowsEntry = nameTable.names.find(n => n.nameID === nameID && n.platformID === 3);
+              if (windowsEntry && windowsEntry.value) {
+                return windowsEntry.value;
+              }
+              
+              // Try Unicode platform
+              const unicodeEntry = nameTable.names.find(n => n.nameID === nameID && n.platformID === 0);
+              if (unicodeEntry && unicodeEntry.value) {
+                return unicodeEntry.value;
+              }
+              
+              // Try Macintosh platform
+              const macEntry = nameTable.names.find(n => n.nameID === nameID && n.platformID === 1);
+              if (macEntry && macEntry.value) {
+                return macEntry.value;
+              }
+            }
+          }
+          return null;
+        },
+        
+        // Legacy API: getEnglishName method
+        () => {
+          if (typeof nameTable.getEnglishName === 'function') {
+            // Try different name IDs in priority order
+            const priorityNameIDs = [1, 4, 6, 16];
+            for (const nameID of priorityNameIDs) {
+              try {
+                const name = nameTable.getEnglishName(nameID);
+                if (name && name.trim()) {
+                  return name;
+                }
+              } catch (error) {
+                // Continue to next name ID
+              }
+            }
+          }
+          return null;
+        },
+        
+        // Direct access to names array with different structure
+        () => {
+          if (nameTable.names) {
+            // Handle different array structures
+            const names = Array.isArray(nameTable.names) ? nameTable.names : Object.values(nameTable.names);
+            
+            // Priority order for name IDs
+            const priorityNameIDs = [1, 4, 6, 16];
+            
+            for (const nameID of priorityNameIDs) {
+              // Try all platforms for each name ID
+              for (const platformID of [3, 0, 1]) { // Windows, Unicode, Macintosh
+                const entry = names.find(n => n.nameID === nameID && n.platformID === platformID);
+                if (entry && entry.value && entry.value.trim()) {
+                  return entry.value;
+                }
+              }
+            }
+          }
+          return null;
+        },
+        
+        // New method: Direct property access for modern fontkit
+        () => {
+          // Try preferredFamily first (most accurate)
+          if (nameTable.preferredFamily && nameTable.preferredFamily.en) {
+            return nameTable.preferredFamily.en;
+          }
+          
+          // Try fontFamily
+          if (nameTable.fontFamily && nameTable.fontFamily.en) {
+            return nameTable.fontFamily.en;
+          }
+          
+          // Try fullName
+          if (nameTable.fullName && nameTable.fullName.en) {
+            return nameTable.fullName.en;
+          }
+          
+          // Try postScriptName
+          if (nameTable.postScriptName && nameTable.postScriptName.en) {
+            return nameTable.postScriptName.en;
+          }
+          
+          return null;
+        }
+      ];
+      
+      // Try each extraction method
+      for (const method of nameExtractionMethods) {
+        try {
+          const result = method();
+          if (result && result.trim()) {
+            fontName = result.trim();
+            break;
+          }
+        } catch (error) {
+          // Continue to next method
+        }
+      }
     }
+    
+    // If fontName is missing, empty, or just a dot, try opentype.js as fallback
+    if (!fontName || fontName.trim() === '' || fontName.trim() === '.') {
+      try {
+        const otFont = await opentype.load(fontPath);
+        // Try preferred order: preferredFamily, fontFamily, fullName, postScriptName
+        fontName = otFont.names.preferredFamily && otFont.names.preferredFamily.en;
+        if (!fontName && otFont.names.fontFamily) fontName = otFont.names.fontFamily.en;
+        if (!fontName && otFont.names.fullName) fontName = otFont.names.fullName.en;
+        if (!fontName && otFont.names.postScriptName) fontName = otFont.names.postScriptName.en;
+        if (!fontName && otFont.names.preferredFamily) fontName = Object.values(otFont.names.preferredFamily)[0];
+        if (!fontName && otFont.names.fontFamily) fontName = Object.values(otFont.names.fontFamily)[0];
+        if (!fontName && otFont.names.fullName) fontName = Object.values(otFont.names.fullName)[0];
+        if (!fontName && otFont.names.postScriptName) fontName = Object.values(otFont.names.postScriptName)[0];
+        if (fontName && typeof fontName === 'object') fontName = Object.values(fontName)[0];
+        if (fontName) fontName = fontName.trim();
+      } catch (err) {
+        // Ignore opentype.js errors, fallback to filename
+      }
+    }
+    
+    // Method 2: Try WOFF/WOFF2 metadata if available
+    if (!fontName && font.tables.meta) {
+      try {
+        // WOFF/WOFF2 metadata is stored in XML format
+        const metadata = font.tables.meta;
+        if (metadata && typeof metadata === 'string') {
+          // Extract font name from XML metadata
+          const nameMatch = metadata.match(/<description[^>]*>.*?<text[^>]*>([^<]+)<\/text>/i);
+          if (nameMatch && nameMatch[1]) {
+            fontName = nameMatch[1].trim();
+          }
+        }
+      } catch (error) {
+        // Continue to fallback methods
+      }
+    }
+    
+    // Method 3: Try OS/2 table for font family name
+    if (!fontName && font.tables.os2) {
+      try {
+        const os2 = font.tables.os2;
+        if (os2.achVendID) {
+          // Some fonts store family name in vendor ID
+          fontName = os2.achVendID;
+        }
+      } catch (error) {
+        // Continue to fallback methods
+      }
+    }
+    
+    // Method 4: Try head table for font name hints
+    if (!fontName && font.tables.head) {
+      try {
+        const head = font.tables.head;
+        if (head.magicNumber === 0x5F0F3CF5) {
+          // Valid TrueType font, try to extract name from other sources
+          console.log('DEBUG: Valid TrueType font detected');
+        }
+      } catch (error) {
+        // Continue to fallback methods
+      }
+    }
+    
+    // Method 5: Fallback to filename with cleanup
+    if (!fontName) {
+      const filename = path.basename(fontPath, path.extname(fontPath));
+      
+      // Clean up common font filename patterns
+      fontName = filename
+        .replace(/[-_]/g, ' ')           // Replace hyphens/underscores with spaces
+        .replace(/\b\w/g, l => l.toUpperCase())  // Title case
+        .replace(/\s+/g, ' ')            // Normalize spaces
+        .replace(/Regular|Normal|Std|Pro|Bold|Italic|Light|Medium|Heavy|Black|Thin|Ultra|Extra/g, '')  // Remove common weight/style suffixes
+        .trim();
+      
+      // If we ended up with an empty string, use the original filename
+      if (!fontName) {
+        fontName = filename;
+      }
+    }
+    
+    // Final cleanup and validation
+    if (fontName) {
+      // Remove any remaining special characters that might cause issues
+      fontName = fontName
+        .replace(/[^\w\s-]/g, '')  // Remove special characters except spaces and hyphens
+        .replace(/\s+/g, ' ')      // Normalize spaces
+        .trim();
+      
+      // Ensure we have a valid font name
+      if (!fontName || fontName.length === 0) {
+        fontName = 'Unknown Font';
+      }
+    } else {
+      fontName = 'Unknown Font';
+    }
+    
+    console.log(`📝 Extracted font name: "${fontName}" from ${path.basename(fontPath)}`);
+    return fontName;
   }
 
   // Find font file in directory
   findFontFile(directory, fontFileName) {
+    // Try the exact filename as provided first
+    const exactPath = path.join(directory, fontFileName);
+    if (fs.existsSync(exactPath)) {
+      return exactPath;
+    }
+    // Then try possible extensions
     const possibleExtensions = ['.woff2', '.woff', '.ttf', '.otf'];
     const baseName = fontFileName.replace(/\.[^.]+$/, ''); // Remove extension if provided
-    
     for (const ext of possibleExtensions) {
       const fullPath = path.join(directory, baseName + ext);
       if (fs.existsSync(fullPath)) {
         return fullPath;
       }
     }
-    
-    // Try the exact filename as provided
-    const exactPath = path.join(directory, fontFileName);
-    if (fs.existsSync(exactPath)) {
-      return exactPath;
-    }
-    
     return null;
   }
 
@@ -64,32 +272,64 @@ class BaselineNudgeGenerator {
     const leadingRem = lineHeightAbsoluteRem - contentAreaRem;
     const baselineOffsetRem = leadingRem / 2 + effectiveAscenderRem;
     const nudgeRem = (Math.ceil(baselineOffsetRem / baselineUnitRem) * baselineUnitRem) - baselineOffsetRem;
-    return Math.round(nudgeRem * 1000) / 1000;
+    
+    // Add compensation for 1px drift by slightly reducing the nudge
+    // Convert 1px to rem (assuming 16px root font size) and subtract a fraction of it
+    const onePixelInRem = 1 / 16; // 1px = 0.0625rem at 16px root
+    const compensation = onePixelInRem * 1; // Use 1 pixel as compensation (2x more than original)
+    
+    // Use scaling compensation that smoothly transitions from 0 at 1rem to full at larger sizes
+    const scaleFactor = Math.max(0, fontSizeRem - 1); // 0 at 1rem, increases with font size
+    const proportionalCompensation = (compensation / fontSizeRem) * scaleFactor;
+    
+    const compensatedNudgeRem = nudgeRem - proportionalCompensation;
+    return Math.round(compensatedNudgeRem * 100000) / 100000;
   }
 
   // Clean classname for CSS (remove leading dots, handle special characters)
   cleanClassname(classname) {
+    if (!classname || typeof classname !== 'string') {
+      return 'unknown';
+    }
     return classname.replace(/^\./, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+
+  getFontFormat(fontFile) {
+    const ext = path.extname(fontFile).toLowerCase();
+    switch (ext) {
+      case '.woff2':
+        return 'woff2';
+      case '.woff':
+        return 'woff';
+      case '.ttf':
+        return 'truetype';
+      case '.otf':
+        return 'opentype';
+      default:
+        return 'truetype'; // fallback
+    }
   }
 
   // Generate tokens from new input format
   generateTokens(config) {
-    const { font, baselineUnit, elements } = config;
+    const { baselineUnit, elements, fontFile } = config;
     const tokens = {
-      font: font,
+      font: this.fontMetrics.fontName || 'Unknown Font',
       baselineUnit: `${baselineUnit}rem`,
+      fontFile: fontFile,
       elements: {}
     };
 
     for (const element of elements) {
-      const { classname, fontSize, lineHeight } = element;
+      const { classname, tag, fontSize, lineHeight } = element;
       const fontSizeRem = fontSize;
       const lineHeightRem = lineHeight;
       const nudgeTop = this.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
       const spaceAfter = 4 * baselineUnit; // Default space after
 
-      // Clean the classname for consistent handling
-      const cleanName = this.cleanClassname(classname);
+      // Use classname if available, otherwise use tag, otherwise fallback to 'element'
+      const elementName = classname || tag || 'element';
+      const cleanName = this.cleanClassname(elementName);
 
       tokens.elements[cleanName] = {
         fontSize: `${fontSizeRem}rem`,
@@ -140,72 +380,36 @@ body {
     
     let styles = `
 <style>
-@import url('https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;600;700&display=swap');
+@font-face {
+  font-family: '${font}';
+  src: url('${tokens.fontFile}') format('${this.getFontFormat(tokens.fontFile)}');
+  font-weight: normal;
+  font-style: normal;
+}
 
 body {
   font-family: '${font}', sans-serif;
   margin: 0;
-  padding: 2rem;
-  line-height: 1.6;
+  padding: 0;
   background: white;
   color: #333;
+  position: relative;
 }
 
 ${this.generateBaselineGridCSS(parseFloat(baselineUnit))}
 
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.show-grid {
-  background: #f8f9fa;
-  padding: 2rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-}
-
-.toggle-grid {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-bottom: 1rem;
-}
-
-.toggle-grid:hover {
-  background: #0056b3;
-}
-
-.element-info {
-  background: #e9ecef;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-family: monospace;
-}
-
-.font-info {
-  background: #d1ecf1;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 2rem;
-  border: 1px solid #bee5eb;
-}
-
-.font-info h3 {
-  margin-top: 0;
-  color: #0c5460;
-}
-
-.font-info code {
-  background: #fff;
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
-  font-size: 0.875rem;
+body.u-baseline-grid::after {
+  background: linear-gradient(to top, rgba(255, 0, 0, 0.15), rgba(255, 0, 0, 0.15) 1px, transparent 1px, transparent);
+  background-size: 100% ${parseFloat(baselineUnit)}rem;
+  bottom: 0;
+  content: "";
+  display: block;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 200;
 }
 `;
 
@@ -229,20 +433,6 @@ ${this.generateBaselineGridCSS(parseFloat(baselineUnit))}
 </style>
 `;
 
-    const fontMetricsInfo = `
-    <div class="font-info">
-      <h3>Font Metrics (From Font File)</h3>
-      <p><strong>Font:</strong> ${font}</p>
-      <p><strong>Baseline Unit:</strong> ${baselineUnit}</p>
-      <p><strong>Metrics:</strong> 
-        <code>ascent: ${this.fontMetrics.ascent}</code>, 
-        <code>descent: ${this.fontMetrics.descent}</code>, 
-        <code>unitsPerEm: ${this.fontMetrics.unitsPerEm}</code>
-      </p>
-      <p><em>✅ Using precise font metrics for accurate baseline alignment.</em></p>
-    </div>
-`;
-
     let htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -252,17 +442,7 @@ ${this.generateBaselineGridCSS(parseFloat(baselineUnit))}
   <title>Baseline Grid Typography Example</title>
   ${styles}
 </head>
-<body>
-  <div class="container">
-    <div class="show-grid">
-      <button class="toggle-grid" onclick="toggleGrid()">Toggle Baseline Grid</button>
-      <p>Click the button above to show/hide the baseline grid overlay.</p>
-    </div>
-    
-    ${fontMetricsInfo}
-    
-    <h1 style="margin-bottom: 2rem;">Typography Examples</h1>
-    <p style="margin-bottom: 2rem;">All text should align perfectly to the baseline grid when the overlay is enabled.</p>
+<body class="u-baseline-grid">
 `;
 
     for (const [classname, props] of Object.entries(elements)) {
@@ -275,23 +455,13 @@ ${this.generateBaselineGridCSS(parseFloat(baselineUnit))}
       const tag = isHeading ? classname : 'p';
       
       htmlContent += `
-    <div class="element-info">
-      .${classname} { font-size: ${props.fontSize}; line-height: ${props.lineHeight}; nudge-top: ${props.nudgeTop}; margin-bottom: ${marginBottom}rem; }
-    </div>
-    <${tag} class="${classname}">
-      ${isHeading ? `This is a ${classname.toUpperCase()} heading` : `This is sample text using the "${classname}" class.`}
-    </${tag}>
+  <${tag} class="${classname}">
+    ${isHeading ? `This is a ${classname.toUpperCase()} heading` : `This is sample text using the "${classname}" class.`}
+  </${tag}>
 `;
     }
 
     htmlContent += `
-  </div>
-
-  <script>
-    function toggleGrid() {
-      document.body.classList.toggle('u-baseline-grid');
-    }
-  </script>
 </body>
 </html>
 `;
@@ -473,8 +643,8 @@ Please ensure your font file is in the same directory as your config file.`);
         // This is sync version for legacy compatibility
         try {
           const fontBuffer = fs.readFileSync(fontPath);
-          const opentype = require('opentype.js');
-          const font = opentype.parse(fontBuffer.buffer);
+          const fontkit = require('fontkit');
+          const font = fontkit.open(fontBuffer.buffer);
           
           this.fontMetrics = {
             ascent: font.tables.hhea.ascender,
@@ -531,3 +701,31 @@ Please ensure your font file is in the same directory as your config file.`);
 }
 
 module.exports = { BaselineNudgeGenerator };
+
+// CLI handling
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  
+  if (args.length === 0) {
+    console.log('Usage: node nudge-generator.js <config-file> [output-dir]');
+    console.log('');
+    console.log('Examples:');
+    console.log('  node nudge-generator.js config.json');
+    console.log('  node nudge-generator.js config.json output/');
+    process.exit(1);
+  }
+  
+  const configFile = args[0];
+  const outputDir = args[1] || '.';
+  
+  const generator = new BaselineNudgeGenerator();
+  
+  generator.generateFiles(configFile, outputDir)
+    .then(result => {
+      console.log('🎉 Generation complete!');
+    })
+    .catch(error => {
+      console.error('❌ Error:', error.message);
+      process.exit(1);
+    });
+}

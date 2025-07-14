@@ -2,6 +2,13 @@
 
 Automatic font metrics reader that generates baseline grid nudges for CSS typography systems. Perfect for design systems that need precise typographic alignment.
 
+## What's New
+
+- **Default config and font:** The package now ships with only one config file for Inter (`config/typography-config.json`).
+- **Easy setup:** Run `npm run downloadDefaultFont` to download the Inter font and set up the default config.
+- **Config tests and generated files are gitignored** for a clean package.
+- **To use your own font:** Replace the Inter font and update the config as needed.
+
 ## Features
 
 - **Font metrics reading** - Extracts precise metrics from webfont files (WOFF2, WOFF, TTF, OTF)
@@ -25,6 +32,44 @@ Or for local project use:
 ```bash
 npm install --save-dev @lyubomir-popov/baseline-nudge-generator
 ```
+
+## Quick Start
+
+1. **Download the default Inter font and config:**
+   ```bash
+   npm run downloadDefaultFont
+   ```
+   This will download Inter-Regular.woff2 to `fonts/` and create `config/typography-config.json`.
+
+2. **Generate tokens and HTML:**
+   ```bash
+   node bin/baseline-nudges.js generate
+   ```
+
+3. **View the result:**
+   ```bash
+   open index.html
+   ```
+
+## Using Your Own Font
+
+- Replace `fonts/Inter-Regular.woff2` with your own font file (WOFF2, WOFF, TTF, or OTF).
+- Update `config/typography-config.json` to point to your font file.
+- Run the generator as above.
+
+## Scripts
+
+- `npm run downloadDefaultFont` — Download Inter font and set up default config
+- `node bin/baseline-nudges.js generate` — Generate tokens and HTML from config
+
+## Clean Package
+
+- Only the Inter config is shipped by default.
+- All test configs and generated files are gitignored.
+
+## For More Details
+
+See the rest of this README for advanced usage, input format, font format support, troubleshooting, and more.
 
 ## Development Workflow
 
@@ -169,6 +214,43 @@ open index.html
 - `tokens.json` - Design tokens with calculated nudge values
 - `index.html` - Visual example with baseline grid overlay
 - Console output showing font metrics used
+
+## Font Format Support
+
+The tool supports various font formats with different levels of compatibility:
+
+### ✅ Fully Supported Formats
+- **TTF (TrueType)** - Full support, recommended for best compatibility
+- **OTF (OpenType)** - Full support, works with most fonts
+- **WOFF (Web Open Font Format)** - Full support, compressed but compatible
+
+### ⚠️ WOFF2 Support (Automatic Decompression)
+- **WOFF2** - Automatically decompressed to TTF for opentype.js compatibility
+- Requires `wawoff2` library: `npm install wawoff2`
+- Or use the CLI tool: `baseline-nudges decompress-woff2 font.woff2`
+
+### Known Limitations
+- **Variable fonts** - May not work with all variable font features
+- **Color fonts** - Limited support for fonts with color glyphs
+- **Complex fonts** - Some fonts with advanced OpenType features may fail
+
+### Troubleshooting Font Issues
+
+If you encounter font loading errors:
+
+1. **"Unsupported OpenType signature"**
+   - Try a different font file (TTF instead of OTF, or vice versa)
+   - Use a static font instead of a variable font
+   - Download the font from a different source
+
+2. **WOFF2 errors**
+   - Install wawoff2: `npm install wawoff2`
+   - Or decompress manually: `baseline-nudges decompress-woff2 font.woff2`
+   - Or use a TTF/OTF/WOFF version of the font
+
+3. **Variable font issues**
+   - Convert to static fonts using font tools
+   - Use a simpler font without variable features
 
 ## Input Format
 

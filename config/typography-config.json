@@ -1,37 +1,36 @@
 {
-  "font": "Inter",
   "baselineUnit": 0.5,
-  "fontFile": "Inter-Regular.woff2",
+  "fontFile": "fonts/Inter-Regular.woff2",
   "elements": [
     {
       "classname": "h1",
-      "fontSize": 5,
-      "lineHeight": 11
-    },
-    {
-      "classname": "h2",
-      "fontSize": 3.5,
-      "lineHeight": 8
-    },
-    {
-      "classname": "h3",
-      "fontSize": 3,
-      "lineHeight": 7
-    },
-    {
-      "classname": "h4",
       "fontSize": 2.5,
-      "lineHeight": 6
-    },
-    {
-      "classname": "h5",
-      "fontSize": 2,
       "lineHeight": 5
     },
     {
-      "classname": "h6",
-      "fontSize": 1.5,
+      "classname": "h2",
+      "fontSize": 2,
       "lineHeight": 4
+    },
+    {
+      "classname": "h3",
+      "fontSize": 1.5,
+      "lineHeight": 3
+    },
+    {
+      "classname": "h4",
+      "fontSize": 1.25,
+      "lineHeight": 3
+    },
+    {
+      "classname": "h5",
+      "fontSize": 1.125,
+      "lineHeight": 3
+    },
+    {
+      "classname": "h6",
+      "fontSize": 1,
+      "lineHeight": 2
     },
     {
       "classname": "p",
