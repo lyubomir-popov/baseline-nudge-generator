@@ -89,7 +89,7 @@ Each element in the `elements` array has these properties:
 - **`lineHeight`** (integer): Number of baseline units for line height (e.g., 5 = 5 × 0.5rem = 2.5rem).
 - **`spaceAfter`** (integer): Number of baseline units for space after the element (e.g., 4 = 4 × 0.5rem = 2rem). Note: The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
 
-### Important: LineHeight vs FontSize
+### Important: Line Height vs Font Size
 
 **Key difference**:
 
@@ -195,19 +195,6 @@ Perfect for design systems that need precise typographic alignment with proper b
 - **🔄 CLI and API access** - Command-line tool and programmatic JavaScript API
 - **⚡ One-command setup** - `baseline-nudges setup` downloads font and creates config automatically
 
-## Features
-
-- **Font metrics reading** - Extracts precise metrics from webfont files (TTF, WOFF, OTF)
-- **Baseline nudge calculation** - Generates precise CSS nudges for baseline grid alignment
-- **Tight line-height support** - Handles negative nudges by moving to next grid line, ensuring all padding-top values are positive
-- **JSON token generation** - Outputs design tokens with nudge values for each typography element
-- **HTML example generation** - Creates a visual example page with baseline grid overlay
-- **Flexible input format** - Accepts typography triplets (classname, font-size, line-height)
-- **CLI tool** - Easy-to-use command-line interface
-- **File watching** - Automatically regenerates when font settings change (legacy mode)
-- **JavaScript API** - Programmatic access for build tools and automation
-- **Backward compatibility** - Supports legacy SCSS generation for existing projects
-
 ## Installation
 
 ```bash
@@ -219,45 +206,6 @@ Or for local project use:
 ```bash
 npm install --save-dev @lyubomir-popov/baseline-nudge-generator
 ```
-
-## Quick Start
-
-1. **Install the package:**
-
-   ```bash
-   npm install -g @lyubomir-popov/baseline-nudge-generator
-   ```
-
-2. **Set up your project (one command does it all):**
-
-   ```bash
-   baseline-nudges setup
-   ```
-
-   This will:
-
-   - Download Fira Sans font to `fonts/FiraSans-Regular.ttf`
-   - Create `config/typography-config.json` with the font path
-   - Extract the font name automatically
-
-3. **Generate tokens and HTML:**
-
-   ```bash
-   baseline-nudges generate config/typography-config.json
-   ```
-
-   This creates:
-
-   - `dist/tokens.json` - Design tokens with calculated nudge values
-   - `dist/index.html` - Visual demo with baseline grid overlay
-   - `dist/fonts/FiraSans-Regular.ttf` - Font file for the HTML demo
-
-4. **View the result:**
-   ```bash
-   open dist/index.html
-   ```
-
-**That's it!** You now have working baseline grid typography with automatic font name extraction.
 
 ## Using Your Own Font
 
