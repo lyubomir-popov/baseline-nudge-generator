@@ -1,12 +1,9 @@
 {
-  "name": "test-runner",
+  "name": "baseline-nudge-generator-tests",
   "version": "1.0.0",
-  "description": "Simple test runner for baseline-nudge-generator",
-  "main": "test-runner.js",
+  "description": "Tests for baseline nudge generator",
+  "private": true,
   "scripts": {
     "test": "node test-runner.js"
-  },
-  "devDependencies": {
-    "fs-extra": "^11.1.0"
   }
 }

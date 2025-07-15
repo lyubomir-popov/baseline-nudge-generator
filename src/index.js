@@ -7,8 +7,8 @@ const { BaselineNudgeGenerator } = require('./nudge-generator');
  * @returns {Promise<Object>} Generated tokens and file paths
  */
 async function generateFromConfig(configPath, outputDir = '.') {
-  const generator = new BaselineNudgeGenerator();
-  return await generator.generateFiles(configPath, outputDir);
+    const generator = new BaselineNudgeGenerator();
+    return await generator.generateFiles(configPath, outputDir);
 }
 
 /**
@@ -17,17 +17,17 @@ async function generateFromConfig(configPath, outputDir = '.') {
  * @returns {Object} Generated tokens
  */
 async function generateTokens(config) {
-  const generator = new BaselineNudgeGenerator();
+    const generator = new BaselineNudgeGenerator();
 
-  // Load font metrics if fontFile is specified
-  if (config.fontFile) {
-    const fontPath = generator.findFontFile('.', config.fontFile);
-    if (fontPath) {
-      generator.fontMetrics = await generator.readFontMetrics(fontPath);
+    // Load font metrics if fontFile is specified
+    if (config.fontFile) {
+        const fontPath = generator.findFontFile('.', config.fontFile);
+        if (fontPath) {
+            generator.fontMetrics = await generator.readFontMetrics(fontPath);
+        }
     }
-  }
 
-  return generator.generateTokens(config);
+    return generator.generateTokens(config);
 }
 
 /**
@@ -36,8 +36,8 @@ async function generateTokens(config) {
  * @returns {string} Generated HTML
  */
 function generateHTML(tokens) {
-  const generator = new BaselineNudgeGenerator();
-  return generator.generateHTML(tokens);
+    const generator = new BaselineNudgeGenerator();
+    return generator.generateHTML(tokens);
 }
 
 /**
@@ -46,8 +46,8 @@ function generateHTML(tokens) {
  * @returns {string} Generated SCSS
  */
 function generateSCSS(config) {
-  const generator = new BaselineNudgeGenerator();
-  return generator.generateScss(config);
+    const generator = new BaselineNudgeGenerator();
+    return generator.generateScss(config);
 }
 
 /**
@@ -56,15 +56,15 @@ function generateSCSS(config) {
  * @returns {Promise<Object>} Font metrics
  */
 async function readFontMetrics(fontPath) {
-  const generator = new BaselineNudgeGenerator();
-  return await generator.readFontMetrics(fontPath);
+    const generator = new BaselineNudgeGenerator();
+    return await generator.readFontMetrics(fontPath);
 }
 
 module.exports = {
-  BaselineNudgeGenerator,
-  generateFromConfig,
-  generateTokens,
-  generateHTML,
-  generateSCSS,
-  readFontMetrics
+    BaselineNudgeGenerator,
+    generateFromConfig,
+    generateTokens,
+    generateHTML,
+    generateSCSS,
+    readFontMetrics
 };

@@ -16,12 +16,11 @@
   "scripts": {
     "start": "node bin/baseline-nudges.js",
     "setup": "node scripts/setup.js",
-    "test": "cd test && node test-runner.js",
-    "test:watch": "cd test && node test-runner.js --watch",
+    "test": "node test/test-runner.js",
     "lint": "eslint src/ bin/ --fix",
     "lint:check": "eslint src/ bin/",
     "validate": "node -e \"const {validateConfigFile} = require('./src/config-validator'); console.log(validateConfigFile('./config/typography-config.json'))\"",
-    "build": "npm run test && npm run validate",
+    "build": "npm run validate && npm run test",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -55,7 +54,7 @@
   "homepage": "https://github.com/lyubomir-popov/baseline-nudge-generator#readme",
   "devDependencies": {
     "@fontsource/inter": "^5.2.6",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "fs-extra": "^11.1.0",
     "jest": "^29.7.0"
   }

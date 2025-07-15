@@ -3,35 +3,35 @@
  */
 
 class FontFileError extends Error {
-  constructor(message, fontPath) {
-    super(message);
-    this.name = 'FontFileError';
-    this.fontPath = fontPath;
-  }
+    constructor(message, fontPath) {
+        super(message);
+        this.name = 'FontFileError';
+        this.fontPath = fontPath;
+    }
 }
 
 class ConfigurationError extends Error {
-  constructor(message, configPath) {
-    super(message);
-    this.name = 'ConfigurationError';
-    this.configPath = configPath;
-  }
+    constructor(message, configPath) {
+        super(message);
+        this.name = 'ConfigurationError';
+        this.configPath = configPath;
+    }
 }
 
 class ValidationError extends Error {
-  constructor(message, errors = []) {
-    super(message);
-    this.name = 'ValidationError';
-    this.errors = errors;
-  }
+    constructor(message, errors = []) {
+        super(message);
+        this.name = 'ValidationError';
+        this.errors = errors;
+    }
 }
 
 class FontMetricsError extends Error {
-  constructor(message, fontPath) {
-    super(message);
-    this.name = 'FontMetricsError';
-    this.fontPath = fontPath;
-  }
+    constructor(message, fontPath) {
+        super(message);
+        this.name = 'FontMetricsError';
+        this.fontPath = fontPath;
+    }
 }
 
 /**
@@ -40,35 +40,35 @@ class FontMetricsError extends Error {
  * @returns {string} Formatted error message
  */
 function formatErrorForCLI(error) {
-  let message = `❌ ${error.name}: ${error.message}`;
+    let message = `❌ ${error.name}: ${error.message}`;
 
-  switch (error.name) {
+    switch (error.name) {
     case 'FontFileError':
-      message += `\n   Font file: ${error.fontPath}`;
-      message += `\n   💡 Supported formats: .woff2, .woff, .ttf, .otf`;
-      break;
+        message += `\n   Font file: ${error.fontPath}`;
+        message += '\n   💡 Supported formats: .woff2, .woff, .ttf, .otf';
+        break;
 
     case 'ConfigurationError':
-      message += `\n   Config file: ${error.configPath}`;
-      message += `\n   💡 Run 'baseline-nudges init' to create a sample config`;
-      break;
+        message += `\n   Config file: ${error.configPath}`;
+        message += '\n   💡 Run \'baseline-nudges init\' to create a sample config';
+        break;
 
     case 'ValidationError':
-      if (error.errors.length > 0) {
-        message += `\n   Validation errors:`;
-        error.errors.forEach(err => {
-          message += `\n     • ${err}`;
-        });
-      }
-      break;
+        if (error.errors.length > 0) {
+            message += '\n   Validation errors:';
+            error.errors.forEach(err => {
+                message += `\n     • ${err}`;
+            });
+        }
+        break;
 
     case 'FontMetricsError':
-      message += `\n   Font file: ${error.fontPath}`;
-      message += `\n   💡 Try a different font format or check if the file is corrupted`;
-      break;
-  }
+        message += `\n   Font file: ${error.fontPath}`;
+        message += '\n   💡 Try a different font format or check if the file is corrupted';
+        break;
+    }
 
-  return message;
+    return message;
 }
 
 /**
@@ -77,12 +77,12 @@ function formatErrorForCLI(error) {
  * @param {boolean} isCliContext - Whether this is called from CLI
  */
 function handleError(error, isCliContext = false) {
-  if (isCliContext) {
-    console.error(formatErrorForCLI(error));
-    process.exit(1);
-  } else {
-    throw error;
-  }
+    if (isCliContext) {
+        console.error(formatErrorForCLI(error));
+        process.exit(1);
+    } else {
+        throw error;
+    }
 }
 
 /**
@@ -92,21 +92,21 @@ function handleError(error, isCliContext = false) {
  * @returns {Function} Wrapped function
  */
 function withErrorHandling(fn, isCliContext = false) {
-  return async (...args) => {
-    try {
-      return await fn(...args);
-    } catch (error) {
-      handleError(error, isCliContext);
-    }
-  };
+    return async (...args) => {
+        try {
+            return await fn(...args);
+        } catch (error) {
+            handleError(error, isCliContext);
+        }
+    };
 }
 
 module.exports = {
-  FontFileError,
-  ConfigurationError,
-  ValidationError,
-  FontMetricsError,
-  formatErrorForCLI,
-  handleError,
-  withErrorHandling
+    FontFileError,
+    ConfigurationError,
+    ValidationError,
+    FontMetricsError,
+    formatErrorForCLI,
+    handleError,
+    withErrorHandling
 };
