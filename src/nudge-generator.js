@@ -323,11 +323,11 @@ class BaselineNudgeGenerator {
     };
 
     for (const element of elements) {
-      const { classname, tag, fontSize, lineHeight } = element;
+      const { classname, tag, fontSize, lineHeight, spaceAfter } = element;
       const fontSizeRem = fontSize;
       const lineHeightRem = lineHeight;
       const nudgeTop = this.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
-      const spaceAfter = 4 * baselineUnit; // Default space after
+      const spaceAfterRem = (spaceAfter || 4) * baselineUnit; // Default to 4 baseline units if not specified
 
       // Use classname if available, otherwise use tag, otherwise fallback to 'element'
       const elementName = classname || tag || 'element';
@@ -336,7 +336,7 @@ class BaselineNudgeGenerator {
       tokens.elements[cleanName] = {
         fontSize: `${fontSizeRem}rem`,
         lineHeight: `${lineHeightRem * baselineUnit}rem`,
-        spaceAfter: `${spaceAfter}rem`,
+        spaceAfter: `${spaceAfterRem}rem`,
         nudgeTop: `${nudgeTop}rem`
       };
     }

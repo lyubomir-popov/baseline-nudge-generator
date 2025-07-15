@@ -70,6 +70,12 @@ function validateConfig(config, configPath = '') {
           errors.push(`${prefix}.lineHeight must be a positive integer (number of baseline units)`);
         }
 
+        if (element.spaceAfter !== undefined) {
+          if (typeof element.spaceAfter !== 'number' || element.spaceAfter <= 0 || !Number.isInteger(element.spaceAfter)) {
+            errors.push(`${prefix}.spaceAfter must be a positive integer (number of baseline units)`);
+          }
+        }
+
         // Check if line height is reasonable
         if (element.fontSize && element.lineHeight && config.baselineUnit) {
           const lineHeightRem = element.lineHeight * config.baselineUnit;

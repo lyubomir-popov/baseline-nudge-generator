@@ -20,12 +20,14 @@ The `typography-config.json` file defines your typography scale and baseline gri
     {
       "classname": "h1",
       "fontSize": 2.5,
-      "lineHeight": 5
+      "lineHeight": 5,
+      "spaceAfter": 4
     },
     {
       "classname": "p",
       "fontSize": 1,
-      "lineHeight": 3
+      "lineHeight": 3,
+      "spaceAfter": 3
     }
   ]
 }
@@ -44,6 +46,7 @@ Each element in the `elements` array has these properties:
 - **`classname`** (string): CSS class name for the element (e.g., "h1", "p", "caption").
 - **`fontSize`** (number): Font size in rem units (e.g., 2.5 = 2.5rem).
 - **`lineHeight`** (integer): Number of baseline units for line height (e.g., 5 = 5 × 0.5rem = 2.5rem).
+- **`spaceAfter`** (integer): Number of baseline units for space after the element (e.g., 4 = 4 × 0.5rem = 2rem). Note: The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
 
 ### Important: LineHeight vs FontSize
 
@@ -51,8 +54,9 @@ Each element in the `elements` array has these properties:
 
 - `fontSize` is specified in **rem units** (e.g., 2.5 = 2.5rem)
 - `lineHeight` is specified as **number of baseline units** (e.g., 5 = 5 × 0.5rem = 2.5rem)
+- `spaceAfter` is specified as **number of baseline units** (e.g., 4 = 4 × 0.5rem = 2rem)
 
-This ensures all line heights are perfect multiples of your baseline unit, maintaining consistent vertical rhythm throughout your typography system.
+This ensures all line heights and spacing are perfect multiples of your baseline unit, maintaining consistent vertical rhythm throughout your typography system.
 
 ### Example Calculation
 
@@ -60,6 +64,9 @@ With `baselineUnit: 0.5`:
 
 - `fontSize: 2.5` = 2.5rem font size
 - `lineHeight: 5` = 5 × 0.5rem = 2.5rem line height
+- `spaceAfter: 4` = 4 × 0.5rem = 2rem space after element
+
+**Important**: The actual CSS `margin-bottom` will be calculated as `spaceAfter - nudgeTop` to ensure proper baseline alignment. For example, if the calculated nudge is 0.375rem, the margin-bottom becomes 2rem - 0.375rem = 1.625rem, so that the total spacing (padding-top + margin-bottom) aligns perfectly with the baseline grid.
 
 ## Generated Files
 
@@ -231,12 +238,14 @@ After running `baseline-nudges setup`, you can replace the downloaded font:
        {
          "classname": "h1", // CSS class name (can be "h1", ".heading-1", etc.)
          "fontSize": 3, // Font size in rem
-         "lineHeight": 6 // Line height in baseline units (6 × 0.5rem = 3rem)
+         "lineHeight": 6, // Line height in baseline units (6 × 0.5rem = 3rem)
+         "spaceAfter": 5 // Space after in baseline units (5 × 0.5rem = 2.5rem)
        },
        {
          "classname": "body-text",
          "fontSize": 1,
-         "lineHeight": 3
+         "lineHeight": 3,
+         "spaceAfter": 3
        }
      ]
    }
