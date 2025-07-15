@@ -4,15 +4,33 @@ node_modules/
 # Font files (excluded due to licensing)
 fonts/
 
-# Generated files during testing
+# Generated files during testing and output
+dist/
+generated/
 test-*.json
 example-*.json
 index.html
 tokens.json
 _generated-nudges.scss
+*-test-results.*
+font-test-results.log
+font-family-test-results.json
 
-# Config test files (keep only the main typography-config.json)
-config/*-config.json
+# Temporary files
+
+# Test artifacts
+test-font*
+
+# Temporary test files in root (should be in test/ directory)
+test-*.js
+test-*.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# User-generated config directory (created by setup)
+config/
 !config/typography-config.json
 
 # Generated demos
@@ -51,4 +69,4 @@ jspm_packages/
 *.tgz
 
 # Yarn Integrity file
-.yarn-integrity 
+.yarn-integrity

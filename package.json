@@ -1,6 +1,6 @@
 {
   "name": "@lyubomir-popov/baseline-nudge-generator",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "Automatic font metrics reader that generates baseline grid nudges for CSS typography systems",
   "main": "src/index.js",
   "bin": {
@@ -15,14 +15,13 @@
   ],
   "scripts": {
     "start": "node bin/baseline-nudges.js",
-    "dev": "npm run ensure-font && concurrently \"npm run serve\" \"npm run watch\" \"npm run refresh\"",
-    "watch": "node bin/baseline-nudges.js watch examples/typography-config.json",
-    "serve": "cd examples && python3 -m http.server 8001",
-    "refresh": "node scripts/browser-refresh.js",
-    "downloadDefaultFont": "node scripts/downloadDefaultFont.js",
-
-    "build": "echo 'No build step needed'",
-    "test": "echo 'No tests yet'",
+    "setup": "node scripts/setup.js",
+    "test": "cd test && node test-runner.js",
+    "test:watch": "cd test && node test-runner.js --watch",
+    "lint": "eslint src/ bin/ --fix",
+    "lint:check": "eslint src/ bin/",
+    "validate": "node -e \"const {validateConfigFile} = require('./src/config-validator'); console.log(validateConfigFile('./config/typography-config.json'))\"",
+    "build": "npm run test && npm run validate",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -39,11 +38,9 @@
   "license": "MIT",
   "dependencies": {
     "chokidar": "^3.5.3",
-    "concurrently": "^8.2.2",
     "fontkit": "^2.0.4",
     "opentype.js": "^1.3.4",
-    "puppeteer": "^24.12.1",
-    "wawoff2": "^2.0.1"
+    "puppeteer": "^24.12.1"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -57,6 +54,9 @@
   },
   "homepage": "https://github.com/lyubomir-popov/baseline-nudge-generator#readme",
   "devDependencies": {
-    "@fontsource/inter": "^5.2.6"
+    "@fontsource/inter": "^5.2.6",
+    "eslint": "^8.57.0",
+    "fs-extra": "^11.1.0",
+    "jest": "^29.7.0"
   }
 }

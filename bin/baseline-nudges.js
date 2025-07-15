@@ -6,6 +6,8 @@
  */
 
 const { BaselineNudgeGenerator } = require('../src/nudge-generator');
+const { validateConfigFile } = require('../src/config-validator');
+const { handleError, withErrorHandling } = require('../src/error-handler');
 const path = require('path');
 const fs = require('fs');
 
@@ -22,11 +24,13 @@ Usage:
   baseline-nudges decompress-woff2 <input.woff2> [output.ttf]
 
 Commands:
-  generate        Generate JSON tokens and HTML example from new format
+  setup           Download font and create working config (recommended first step)
+  init            Complete setup: download font, extract name, create config, generate demo
+  init-manual     Create example configuration file (requires manual font setup)
+  generate        Generate JSON tokens and HTML example from configuration
   generate-legacy Generate SCSS file from legacy configuration (backward compatibility)
   watch           Watch legacy configuration file and regenerate on changes
-  init            Create example configuration file (new format)
-  init-legacy     Create example configuration file (legacy format)
+  validate        Validate configuration file
   decompress-woff2 Decompress WOFF2 file to TTF for opentype.js compatibility
 
 Options:
@@ -35,7 +39,7 @@ Options:
 
 Font Format Support:
   ✅ TTF (TrueType) - Full support
-  ✅ OTF (OpenType) - Full support  
+  ✅ OTF (OpenType) - Full support
   ✅ WOFF (Web Open Font Format) - Full support
   ⚠️  WOFF2 - Automatic decompression to TTF (requires wawoff2)
 
@@ -55,73 +59,101 @@ function showVersion() {
 }
 
 function createExampleConfig(name = 'typography-config') {
-      const baselineUnit = 0.5;
-    const fontSizes = [
-      { classname: "h1", fontSize: 4 },
-      { classname: "h2", fontSize: 3.5 },
-      { classname: "h3", fontSize: 3 },
-      { classname: "h4", fontSize: 2.5 },
-      { classname: "h5", fontSize: 2 },
-      { classname: "h6", fontSize: 1.5 },
-      { classname: "p", fontSize: 1 }
-    ];
-    
-    // Calculate line-height based on font-size for good readability
-    // Formula: line-height = (ceil(font-size / baselineUnit) + 1) * baselineUnit
-    // Example: 1rem font-size with 0.5rem baseline unit
-    //   → 1rem ÷ 0.5rem = 2 baseline units fit in font-size
-    //   → Add 1 extra baseline unit = 2 + 1 = 3 baseline units
-    //   → 3 × 0.5rem = 1.5rem line-height (1.5 ratio)
-    const elements = fontSizes.map(element => {
-      const baselineUnitsInFontSize = Math.ceil(element.fontSize / baselineUnit);
-      const lineHeightInBaselineUnits = baselineUnitsInFontSize + 1;
-      return {
-        ...element,
-        lineHeight: lineHeightInBaselineUnits
-      };
-    });
-    
-    const config = {
-      font: "Inter",
-      baselineUnit: baselineUnit,
-      fontFile: "your-font.woff2",
-      elements: elements
+  const baselineUnit = 0.5;
+  const fontSizes = [
+    { classname: "h1", fontSize: 4 },
+    { classname: "h2", fontSize: 3.5 },
+    { classname: "h3", fontSize: 3 },
+    { classname: "h4", fontSize: 2.5 },
+    { classname: "h5", fontSize: 2 },
+    { classname: "h6", fontSize: 1.5 },
+    { classname: "p", fontSize: 1 }
+  ];
+
+  // Calculate line-height based on font-size for good readability
+  const elements = fontSizes.map(element => {
+    const baselineUnitsInFontSize = Math.ceil(element.fontSize / baselineUnit);
+    const lineHeightInBaselineUnits = baselineUnitsInFontSize + 1;
+    return {
+      ...element,
+      lineHeight: lineHeightInBaselineUnits
     };
+  });
+
+  const config = {
+    font: "Inter",
+    baselineUnit: baselineUnit,
+    fontFile: "fonts/Inter-Regular.ttf", // Default to TTF as it's most compatible
+    elements: elements
+  };
 
   const filename = `${name}.json`;
-  fs.writeFileSync(filename, JSON.stringify(config, null, 2));
-  console.log(`✅ Created example configuration: ${filename}`);
-  console.log('');
-  console.log('📝 Configuration details:');
-  console.log(`   • Font: ${config.font}`);
-  console.log(`   • Baseline unit: ${config.baselineUnit}rem`);
-  console.log(`   • Elements: ${config.elements.length} typography elements`);
-  console.log(`   • Font file: ${config.fontFile} (REQUIRED - you must provide this)`);
-  console.log('');
-  console.log('💡 Typography scale:');
-  for (const element of config.elements) {
-    const lineHeightRem = element.lineHeight * config.baselineUnit;
-    console.log(`   • ${element.classname}: ${element.fontSize}rem / ${lineHeightRem}rem`);
+  return { config, filename };
+}
+
+async function createExampleConfigWithFont(name = 'typography-config') {
+  try {
+    console.log('🔍 Setting up Inter font...');
+
+    // Download Inter font
+    const { downloadInterFont } = require('../scripts/downloadDefaultFont');
+    const fontResult = await downloadInterFont();
+
+    // Create config with the downloaded font
+    const { config, filename } = createExampleConfig(name);
+    config.fontFile = fontResult.filename;
+
+    fs.writeFileSync(filename, JSON.stringify(config, null, 2));
+    console.log(`✅ Created example configuration: ${filename}`);
+    console.log('');
+    console.log('📝 Configuration details:');
+    console.log(`   • Font: ${config.font}`);
+    console.log(`   • Baseline unit: ${config.baselineUnit}rem`);
+    console.log(`   • Elements: ${config.elements.length} typography elements`);
+    console.log(`   • Font file: ${config.fontFile} (✅ Downloaded and verified)`);
+    console.log('');
+    console.log('💡 Typography scale:');
+    for (const element of config.elements) {
+      const lineHeightRem = element.lineHeight * config.baselineUnit;
+      console.log(`   • ${element.classname}: ${element.fontSize}rem / ${lineHeightRem}rem`);
+    }
+    console.log('');
+    console.log('🚀 Ready to generate:');
+    console.log(`   baseline-nudges generate ${filename}`);
+    console.log('');
+    console.log('📄 Then open index.html in your browser');
+
+  } catch (error) {
+    console.error('❌ Error setting up font:', error.message);
+    console.log('');
+    console.log('💡 Falling back to manual font setup...');
+
+    // Fallback to manual setup
+    const { config, filename } = createExampleConfig(name);
+    config.fontFile = "your-font.woff2";
+
+    fs.writeFileSync(filename, JSON.stringify(config, null, 2));
+    console.log(`✅ Created example configuration: ${filename}`);
+    console.log('');
+    console.log('🎨 REQUIRED: Add your font file to this directory');
+    console.log('   The tool requires a font file to calculate accurate baseline nudges.');
+    console.log('   Supported formats: .woff2, .woff, .ttf, .otf');
+    console.log('');
+    console.log('📥 Get font files:');
+    console.log('   • Google Fonts: https://fonts.google.com/');
+    console.log('   • Font Squirrel: https://www.fontsquirrel.com/');
+    console.log('   • Inter font: https://github.com/rsms/inter/releases');
+    console.log('');
+    console.log('💡 For testing with Inter font:');
+    console.log('   1. Download Inter-Regular.woff2 or Inter-VariableFont_opsz,wght.ttf');
+    console.log('   2. Place it in the same directory as your config file');
+    console.log('   3. Update "fontFile" in the config to match your font filename');
+    console.log('');
+    console.log('🚀 Once you have your font file:');
+    console.log(`   baseline-nudges generate ${filename}`);
+    console.log('');
+    console.log('📄 Then open index.html in your browser');
   }
-  console.log('');
-  console.log('🎨 REQUIRED: Add your font file to this directory');
-  console.log('   The tool requires a font file to calculate accurate baseline nudges.');
-  console.log('   Supported formats: .woff2, .woff, .ttf, .otf');
-  console.log('');
-  console.log('📥 Get font files:');
-  console.log('   • Google Fonts: https://fonts.google.com/');
-  console.log('   • Font Squirrel: https://www.fontsquirrel.com/');
-  console.log('   • Inter font: https://github.com/rsms/inter/releases');
-  console.log('');
-  console.log('💡 For testing with Inter font:');
-  console.log('   1. Download Inter-Regular.woff2 or Inter-VariableFont_opsz,wght.ttf');
-  console.log('   2. Place it in the same directory as your config file');
-  console.log('   3. Update "fontFile" in the config to match your font filename');
-  console.log('');
-  console.log('🚀 Once you have your font file:');
-  console.log(`   baseline-nudges generate ${filename}`);
-  console.log('');
-  console.log('📄 Then open index.html in your browser');
 }
 
 function createLegacyExampleConfig(name = 'typography-config-legacy') {
@@ -169,32 +201,38 @@ function createLegacyExampleConfig(name = 'typography-config-legacy') {
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
     showHelp();
     return;
   }
-  
+
   if (args.includes('-v') || args.includes('--version')) {
     showVersion();
     return;
   }
 
   const command = args[0];
-  
+
   switch (command) {
-    case 'init': {
-      const name = args[1];
-      createExampleConfig(name);
+    case 'setup': {
+      const { setup } = require('../scripts/setup');
+      await setup();
       break;
     }
-    
+
+    case 'init': {
+      const name = args[1];
+      await createExampleConfigWithFont(name);
+      break;
+    }
+
     case 'init-legacy': {
       const name = args[1];
       createLegacyExampleConfig(name);
       break;
     }
-    
+
     case 'generate': {
       const inputPath = args[1];
       if (!inputPath) {
@@ -202,28 +240,27 @@ async function main() {
         console.log('Usage: baseline-nudges generate <config.json> [output-dir]');
         process.exit(1);
       }
-      
-      const outputDir = args[2] || path.dirname(inputPath);
-      
+
+      const outputDir = args[2] || 'dist';
+
       const parserArgIndex = process.argv.indexOf('--parser');
       let parser = 'opentype';
       if (parserArgIndex !== -1 && process.argv[parserArgIndex + 1]) {
         parser = process.argv[parserArgIndex + 1];
       }
 
-      try {
+      const generateWithErrorHandling = withErrorHandling(async () => {
         const generator = new BaselineNudgeGenerator(null, parser);
         await generator.generateFiles(inputPath, outputDir);
         console.log('🎉 Generation complete!');
         console.log(`📁 Output directory: ${outputDir}`);
         console.log(`📄 Open ${path.join(outputDir, 'index.html')} in your browser to see the results`);
-      } catch (error) {
-        console.error('❌ Error:', error.message);
-        process.exit(1);
-      }
+      }, true);
+
+      await generateWithErrorHandling();
       break;
     }
-    
+
     case 'generate-legacy': {
       const inputPath = args[1];
       if (!inputPath) {
@@ -231,9 +268,9 @@ async function main() {
         console.log('Usage: baseline-nudges generate-legacy <config.json> [output.scss]');
         process.exit(1);
       }
-      
+
       const outputPath = args[2] || path.join(path.dirname(inputPath), '_generated-nudges.scss');
-      
+
       try {
         const generator = new BaselineNudgeGenerator();
         generator.generateFile(inputPath, outputPath);
@@ -243,7 +280,7 @@ async function main() {
       }
       break;
     }
-    
+
     case 'watch': {
       const inputPath = args[1];
       if (!inputPath) {
@@ -251,27 +288,58 @@ async function main() {
         console.log('Usage: baseline-nudges watch <config.json> [output.scss]');
         process.exit(1);
       }
-      
+
       const outputPath = args[2] || path.join(path.dirname(inputPath), '_generated-nudges.scss');
-      
+
       try {
         const generator = new BaselineNudgeGenerator();
         const watcher = generator.watch(inputPath, outputPath);
-        
+
         // Handle graceful shutdown
         process.on('SIGINT', () => {
           console.log('\n👋 Stopping watcher...');
           watcher.close();
           process.exit(0);
         });
-        
+
       } catch (error) {
         console.error('❌ Error:', error.message);
         process.exit(1);
       }
       break;
     }
-    
+
+    case 'validate': {
+      const inputPath = args[1];
+      if (!inputPath) {
+        console.error('❌ Error: Input configuration file required');
+        console.log('Usage: baseline-nudges validate <config.json>');
+        process.exit(1);
+      }
+
+      const validation = validateConfigFile(inputPath);
+
+      if (validation.isValid) {
+        console.log('✅ Configuration is valid!');
+        if (validation.warnings.length > 0) {
+          console.log('\n⚠️  Warnings:');
+          validation.warnings.forEach(warning => console.log(`   ${warning}`));
+        }
+      } else {
+        console.log('❌ Configuration is invalid!');
+        console.log('\nErrors:');
+        validation.errors.forEach(error => console.log(`   ${error}`));
+
+        if (validation.warnings.length > 0) {
+          console.log('\nWarnings:');
+          validation.warnings.forEach(warning => console.log(`   ${warning}`));
+        }
+
+        process.exit(1);
+      }
+      break;
+    }
+
     case 'decompress-woff2': {
       const inputPath = args[1];
       if (!inputPath) {
@@ -294,7 +362,7 @@ async function main() {
       }
       break;
     }
-    
+
     default:
       console.error(`❌ Unknown command: ${command}`);
       showHelp();

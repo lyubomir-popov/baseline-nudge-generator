@@ -1,6 +1,6 @@
 {
   "baselineUnit": 0.5,
-  "fontFile": "fonts/Inter-Regular.woff2",
+  "fontFile": "../fonts/FiraSans-Regular.ttf",
   "elements": [
     {
       "classname": "h1",

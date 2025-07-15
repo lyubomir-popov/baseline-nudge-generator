@@ -1,17 +1,134 @@
 # @lyubomir-popov/baseline-nudge-generator
 
-Automatic font metrics reader that generates baseline grid nudges for CSS typography systems. Perfect for design systems that need precise typographic alignment.
+Automatic font metrics reader that generates baseline grid nudges for CSS typogr3. **Regenerate with your font:**
+
+```bash
+baseline-nudges generate config/typography-config.json
+```
+
+The font name will be automatically extracted from your font file and used in the generated HTML and CSS.
+
+## Configuration Format
+
+The `typography-config.json` file defines your typography scale and baseline grid settings:
+
+```json
+{
+  "baselineUnit": 0.5,
+  "fontFile": "../fonts/FiraSans-Regular.ttf",
+  "elements": [
+    {
+      "classname": "h1",
+      "fontSize": 2.5,
+      "lineHeight": 5
+    },
+    {
+      "classname": "p",
+      "fontSize": 1,
+      "lineHeight": 3
+    }
+  ]
+}
+```
+
+### Configuration Properties
+
+- **`baselineUnit`** (number): The baseline grid unit in rem. Common values are 0.5rem or 0.25rem.
+- **`fontFile`** (string): Relative path to your font file from the config directory.
+- **`elements`** (array): Array of typography elements to generate.
+
+### Element Properties
+
+Each element in the `elements` array has these properties:
+
+- **`classname`** (string): CSS class name for the element (e.g., "h1", "p", "caption").
+- **`fontSize`** (number): Font size in rem units (e.g., 2.5 = 2.5rem).
+- **`lineHeight`** (integer): Number of baseline units for line height (e.g., 5 = 5 × 0.5rem = 2.5rem).
+
+### Important: LineHeight vs FontSize
+
+**Key difference**:
+
+- `fontSize` is specified in **rem units** (e.g., 2.5 = 2.5rem)
+- `lineHeight` is specified as **number of baseline units** (e.g., 5 = 5 × 0.5rem = 2.5rem)
+
+This ensures all line heights are perfect multiples of your baseline unit, maintaining consistent vertical rhythm throughout your typography system.
+
+### Example Calculation
+
+With `baselineUnit: 0.5`:
+
+- `fontSize: 2.5` = 2.5rem font size
+- `lineHeight: 5` = 5 × 0.5rem = 2.5rem line height
+
+## Generated Files
+
+Running `baseline-nudges generate config/typography-config.json` creates:
+
+### `dist/tokens.json`
+
+Design tokens with calculated nudge values for each typography element:
+
+```json
+{
+  "font": "Fira Sans",
+  "baselineUnit": 0.5,
+  "fontFile": "../fonts/FiraSans-Regular.ttf",
+  "elements": [
+    {
+      "classname": "h1",
+      "fontSize": 2.5,
+      "lineHeight": 2.5,
+      "paddingTop": 0.375,
+      "marginBottom": 1.625
+    }
+  ]
+}
+```
+
+### `dist/index.html`
+
+Interactive HTML demo with:
+
+- Baseline grid overlay (red lines)
+- All typography elements with calculated nudges
+- Self-contained with embedded font
+
+### `dist/fonts/`
+
+Copy of your font file for the HTML demo to work offline.
+
+## Using the Generated Tokens
+
+Import the tokens into your CSS build process or design system:
+
+````javascript
+const tokens = require('./dist/tokens.json');
+
+// Generate CSS
+tokens.elements.forEach(element => {
+  console.log(`
+.${element.classname} {
+  font-size: ${element.fontSize}rem;
+  line-height: ${element.lineHeight}rem;
+  padding-top: ${element.paddingTop}rem;
+  margin-bottom: ${element.marginBottom}rem;
+}
+  `);
+});
+```ystems. Perfect for design systems that need precise typographic alignment.
 
 ## What's New
 
-- **Default config and font:** The package now ships with only one config file for Inter (`config/typography-config.json`).
-- **Easy setup:** Run `npm run downloadDefaultFont` to download the Inter font and set up the default config.
-- **Config tests and generated files are gitignored** for a clean package.
-- **To use your own font:** Replace the Inter font and update the config as needed.
+- **One-command setup:** Run `baseline-nudges setup` to download font and create config automatically
+- **Reliable font source:** Uses Fira Sans from Google Fonts GitHub mirror (won't break)
+- **Automatic font name extraction:** Extracts font name from TTF/WOFF files automatically
+- **Simplified format support:** TTF, WOFF, OTF supported (WOFF2 removed for reliability)
+- **Out-of-the-box experience:** No manual font file management needed
 
 ## Features
 
-- **Font metrics reading** - Extracts precise metrics from webfont files (WOFF2, WOFF, TTF, OTF)
+- **Font metrics reading** - Extracts precise metrics from webfont files (TTF, WOFF, OTF)
 - **Baseline nudge calculation** - Generates precise CSS nudges for baseline grid alignment
 - **JSON token generation** - Outputs design tokens with nudge values for each typography element
 - **HTML example generation** - Creates a visual example page with baseline grid overlay
@@ -25,7 +142,7 @@ Automatic font metrics reader that generates baseline grid nudges for CSS typogr
 
 ```bash
 npm install -g @lyubomir-popov/baseline-nudge-generator
-```
+````
 
 Or for local project use:
 
@@ -35,558 +152,156 @@ npm install --save-dev @lyubomir-popov/baseline-nudge-generator
 
 ## Quick Start
 
-1. **Download the default Inter font and config:**
-   ```bash
-   npm run downloadDefaultFont
-   ```
-   This will download Inter-Regular.woff2 to `fonts/` and create `config/typography-config.json`.
+1. **Install the package:**
 
-2. **Generate tokens and HTML:**
    ```bash
-   node bin/baseline-nudges.js generate
+   npm install -g @lyubomir-popov/baseline-nudge-generator
    ```
 
-3. **View the result:**
+2. **Set up your project (one command does it all):**
+
    ```bash
-   open index.html
+   baseline-nudges setup
    ```
+
+   This will:
+
+   - Download Fira Sans font to `fonts/FiraSans-Regular.ttf`
+   - Create `config/typography-config.json` with the font path
+   - Extract the font name automatically
+
+3. **Generate tokens and HTML:**
+
+   ```bash
+   baseline-nudges generate config/typography-config.json
+   ```
+
+   This creates:
+
+   - `dist/tokens.json` - Design tokens with calculated nudge values
+   - `dist/index.html` - Visual demo with baseline grid overlay
+   - `dist/fonts/FiraSans-Regular.ttf` - Font file for the HTML demo
+
+4. **View the result:**
+   ```bash
+   open dist/index.html
+   ```
+
+**That's it!** You now have working baseline grid typography with automatic font name extraction.
 
 ## Using Your Own Font
 
-- Replace `fonts/Inter-Regular.woff2` with your own font file (WOFF2, WOFF, TTF, or OTF).
-- Update `config/typography-config.json` to point to your font file.
-- Run the generator as above.
+After running `baseline-nudges setup`, you can replace the downloaded font:
 
-## Scripts
+1. **Replace the font file:**
 
-- `npm run downloadDefaultFont` — Download Inter font and set up default config
-- `node bin/baseline-nudges.js generate` — Generate tokens and HTML from config
+   ```bash
+   # Replace with your font file
+   cp path/to/your-font.ttf fonts/FiraSans-Regular.ttf
 
-## Clean Package
+   # Or rename your font and update the config
+   cp path/to/your-font.ttf fonts/YourFont-Regular.ttf
+   ```
 
-- Only the Inter config is shipped by default.
-- All test configs and generated files are gitignored.
+2. **Update the config file:**
 
-## For More Details
+   Edit `config/typography-config.json` and change the `fontFile` path:
 
-See the rest of this README for advanced usage, input format, font format support, troubleshooting, and more.
+   ```json
+   {
+     "baselineUnit": 0.5,
+     "fontFile": "../fonts/YourFont-Regular.ttf",
+     "elements": [
+       {
+         "classname": "h1",
+         "fontSize": 2.5,
+         "lineHeight": 5
+       }
+     ]
+   }
+   ```
 
-## Development Workflow
+3. **Customize your typography scale:**
 
-### Local Development
+   Edit the `elements` array to match your design system:
 
-For development and testing with the included demo:
+   ```json
+   {
+     "elements": [
+       {
+         "classname": "h1", // CSS class name (can be "h1", ".heading-1", etc.)
+         "fontSize": 3, // Font size in rem
+         "lineHeight": 6 // Line height in baseline units (6 × 0.5rem = 3rem)
+       },
+       {
+         "classname": "body-text",
+         "fontSize": 1,
+         "lineHeight": 3
+       }
+     ]
+   }
+   ```
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd baseline-nudge-generator
+4. **Regenerate with your font:**
+   ```bash
+   baseline-nudges generate config/typography-config.json
+   ```
 
-# Install dependencies
-npm install
-
-# Start development server with file watcher
-npm run dev
-```
-
-This will:
-- Start a Python HTTP server on `http://localhost:8001`
-- Watch `examples/typography-config.json` for changes
-- Automatically regenerate tokens and CSS when config changes
-- **Auto-refresh browser** when changes are detected
-- Serve the demo page with baseline grid overlay
-
-### Demo Configuration
-
-The project includes a working demo in the `examples/` directory:
-
-```json
-{
-  "font": "Inter",
-  "baselineUnit": 0.5,
-  "fontFile": "Inter-Regular.woff2",
-  "elements": [
-    { "classname": "h1", "fontSize": 5, "lineHeight": 11 },
-    { "classname": "h2", "fontSize": 3.5, "lineHeight": 8 },
-    { "classname": "h3", "fontSize": 3, "lineHeight": 7 },
-    { "classname": "h4", "fontSize": 2.5, "lineHeight": 6 },
-    { "classname": "h5", "fontSize": 2, "lineHeight": 5 },
-    { "classname": "h6", "fontSize": 1.5, "lineHeight": 4 },
-    { "classname": "p", "fontSize": 1, "lineHeight": 3 }
-  ]
-}
-```
-
-**Automatic Font Download**: The Inter font file is automatically downloaded during `npm install` and `npm run dev`.
-
-### Demo Features
-
-The demo page (`examples/index.html`) includes:
-- **Clean typography display** - Only h1-h6 and p elements (no classes)
-- **Baseline grid overlay** - Always visible red lines every 0.5rem
-- **Dynamic CSS generation** - Reads from `tokens.json` and applies styles
-- **Real font metrics** - Uses actual Inter font file for calculations
-- **Automatic setup** - Font downloaded automatically, ready to use out of the box
-
-> **Note:** The demo uses only element selectors (h1-h6, p) for clarity and simplicity. However, the configuration format supports both element names (e.g. "h1") and custom class names (e.g. ".my-heading").
-
-### Available Scripts
-
-```bash
-npm run dev      # Start server + watcher + browser refresh (development)
-npm run watch    # Watch config file for changes
-npm run serve    # Start HTTP server only
-npm run refresh  # Browser refresh watcher only
-npm start        # Run CLI tool
-```
-
-## Quick Start Guide
-
-### 1. Create a test project
-
-```bash
-mkdir my-typography-test
-cd my-typography-test
-```
-
-### 2. Initialize configuration
-
-```bash
-baseline-nudges init
-```
-
-This creates a `typography-config.json` file:
-
-```json
-{
-  "font": "Inter",
-  "baselineUnit": 0.5,
-  "fontFile": "your-font.woff2",
-  "elements": [
-    { "classname": "h1", "fontSize": 4, "lineHeight": 8.5 },
-    { "classname": "h2", "fontSize": 3.5, "lineHeight": 7.5 },
-    { "classname": "h3", "fontSize": 3, "lineHeight": 6.5 },
-    { "classname": "h4", "fontSize": 2.5, "lineHeight": 5.5 },
-    { "classname": "h5", "fontSize": 2, "lineHeight": 4.5 },
-    { "classname": "h6", "fontSize": 1.5, "lineHeight": 4 },
-    { "classname": "p", "fontSize": 1, "lineHeight": 3 }
-  ]
-}
-```
-
-### 3. Add your font file (REQUIRED)
-
-The tool requires a font file to calculate accurate baseline nudges.
-
-**Download and add font file:**
-```bash
-# Option A: Download Inter font for testing
-curl -o Inter-Regular.woff2 "https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Regular.woff2"
-
-# Option B: Copy your own font file
-cp path/to/your/font.woff2 .
-
-# Option C: Update the config to match your font filename
-# Edit typography-config.json and change "fontFile": "your-font.woff2" to your actual filename
-```
-
-**Where to get font files:**
-- [Google Fonts](https://fonts.google.com/) - Download font families
-- [Font Squirrel](https://www.fontsquirrel.com/) - Free web fonts
-- [Inter Font](https://github.com/rsms/inter/releases) - Open source font
-- Commercial font providers (Adobe Fonts, Monotype, etc.)
-
-**Important**: You must provide your own font files. This package does not include any fonts due to licensing restrictions.
-
-### 4. Generate tokens and HTML
-
-```bash
-baseline-nudges generate typography-config.json
-```
-
-### 5. View results
-
-```bash
-open index.html
-```
-
-**Expected output:**
-- `tokens.json` - Design tokens with calculated nudge values
-- `index.html` - Visual example with baseline grid overlay
-- Console output showing font metrics used
+The font name will be automatically extracted from your font file and used in the generated HTML and tokens.
 
 ## Font Format Support
 
-The tool supports various font formats with different levels of compatibility:
+The tool supports various font formats:
 
-### ✅ Fully Supported Formats
-- **TTF (TrueType)** - Full support, recommended for best compatibility
-- **OTF (OpenType)** - Full support, works with most fonts
-- **WOFF (Web Open Font Format)** - Full support, compressed but compatible
+### ✅ Supported Formats
 
-### ⚠️ WOFF2 Support (Automatic Decompression)
-- **WOFF2** - Automatically decompressed to TTF for opentype.js compatibility
-- Requires `wawoff2` library: `npm install wawoff2`
-- Or use the CLI tool: `baseline-nudges decompress-woff2 font.woff2`
+- **TTF (TrueType)** - Recommended for best compatibility
+- **WOFF (Web Open Font Format)** - Good compatibility
+- **OTF (OpenType)** - Good compatibility
 
-### Known Limitations
-- **Variable fonts** - May not work with all variable font features
-- **Color fonts** - Limited support for fonts with color glyphs
-- **Complex fonts** - Some fonts with advanced OpenType features may fail
+### ❌ Not Supported
 
-### Troubleshooting Font Issues
+- **WOFF2** - Removed for reliability (use TTF/WOFF instead)
 
-If you encounter font loading errors:
-
-1. **"Unsupported OpenType signature"**
-   - Try a different font file (TTF instead of OTF, or vice versa)
-   - Use a static font instead of a variable font
-   - Download the font from a different source
-
-2. **WOFF2 errors**
-   - Install wawoff2: `npm install wawoff2`
-   - Or decompress manually: `baseline-nudges decompress-woff2 font.woff2`
-   - Or use a TTF/OTF/WOFF version of the font
-
-3. **Variable font issues**
-   - Convert to static fonts using font tools
-   - Use a simpler font without variable features
-
-## Input Format
-
-The tool accepts a JSON configuration with:
-
-```json
-{
-  "font": "Inter",                    // Font family name (for Google Fonts import)
-  "baselineUnit": 0.5,                // Baseline grid unit in rem (e.g., 0.5rem = 8px)
-  "fontFile": "your-font.woff2",      // REQUIRED: Font file for accurate metrics
-  "elements": [                       // Array of typography elements
-    {
-      "classname": "h1",              // CSS class name or HTML element name
-      "fontSize": 4,                  // Font size in rem
-      "lineHeight": 8.5               // Line height in baseline units
-    },
-    {
-      "classname": "h2",
-      "fontSize": 3.5,
-      "lineHeight": 7.5
-    },
-    {
-      "classname": "h3",
-      "fontSize": 3,
-      "lineHeight": 6.5
-    },
-    {
-      "classname": "h4",
-      "fontSize": 2.5,
-      "lineHeight": 5.5
-    },
-    {
-      "classname": "h5",
-      "fontSize": 2,
-      "lineHeight": 4.5
-    },
-    {
-      "classname": "h6",
-      "fontSize": 1.5,
-      "lineHeight": 4
-    },
-    {
-      "classname": "p",
-      "fontSize": 1,
-      "lineHeight": 3
-    }
-  ]
-}
-```
-
-> **Note:** The `classname` field can be either an HTML element name (e.g. "h1", "p") or a custom class name (e.g. ".my-heading"). The demo uses only element names for simplicity, but the generator supports both.
-
-**Key points:**
-- `fontSize` is in rem units
-- `lineHeight` is in multiples of `baselineUnit`
-- `fontFile` is REQUIRED for accurate calculations
-- Font file must be in the same directory as your config file
-
-**Classname flexibility:**
-- Use HTML tag names: `"h1"`, `"h2"`, `"p"`, etc.
-- Use CSS class names: `"heading-1"`, `"body-text"`, `".large-title"`, etc.
-- System handles both formats automatically
-
-## Font Files
-
-**Required formats:**
-- `.woff2` (recommended)
-- `.woff`
-- `.ttf`
-- `.otf`
-
-**Font file discovery:**
-The tool looks for your font file in this order:
-1. Exact filename as specified
-2. Filename with common extensions (.woff2, .woff, .ttf, .otf)
-3. Errors if not found
-
-**Where to get font files:**
-- [Google Fonts](https://fonts.google.com/) - Click "Download family" 
-- [Font Squirrel](https://www.fontsquirrel.com/) - Free web fonts
-- [Inter Font](https://github.com/rsms/inter/releases) - Used in examples
-- Commercial font providers (Adobe Fonts, Monotype, etc.)
-
-## Generated Output
-
-### tokens.json
-```json
-{
-  "font": "Inter",
-  "baselineUnit": "0.5rem",
-  "elements": {
-    "h1": {
-      "fontSize": "4rem",
-      "lineHeight": "4.25rem",        // lineHeight × baselineUnit (8.5 × 0.5)
-      "spaceAfter": "2rem",           // Default spacing after element
-      "nudgeTop": "0.182rem"          // Calculated nudge for baseline alignment
-    },
-    "h2": {
-      "fontSize": "3.5rem",
-      "lineHeight": "3.75rem",        // lineHeight × baselineUnit (7.5 × 0.5)
-      "spaceAfter": "2rem",
-      "nudgeTop": "0.136rem"
-    }
-  }
-}
-```
-
-### index.html
-Clean HTML example with:
-- All typography elements (h1-h6, p) applied
-- Baseline grid overlay (red lines every 0.5rem, always visible)
-- Dynamic CSS generation from tokens.json
-- Real font metrics from font file
-- Proper baseline alignment demonstration
-
-### _generated-nudges.scss (Legacy Mode)
-When using legacy SCSS generation, the tool creates:
-
-```scss
-// AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.
-// Generated by @lyubomir-popov/baseline-nudge-generator
-
-$baseline-unit: 0.5rem;
-$font-sizes: (
-  h1: 4rem,
-  h2: 3.5rem,
-  h3: 3rem,
-  h4: 2.5rem,
-  h5: 2rem,
-  h6: 1.5rem,
-  p: 1rem,
-  small: 0.875rem,
-);
-$line-heights: (
-  h1: 8.5 * $baseline-unit,
-  h2: 7.5 * $baseline-unit,
-  h3: 6.5 * $baseline-unit,
-  h4: 5.5 * $baseline-unit,
-  h5: 4.5 * $baseline-unit,
-  h6: 4 * $baseline-unit,
-  p: 3 * $baseline-unit,
-  small: 2 * $baseline-unit,
-);
-$nudges: (
-  h1: 0.182rem,
-  h2: 0.136rem,
-  h3: 0.089rem,
-  h4: 0.043rem,
-  h5: 0.291rem,
-  h6: 0.245rem,
-  p: 0.477rem,
-  small: 0.261rem,
-);
-$space-after: (
-  h1: 2rem,
-  h2: 2rem,
-  h3: 2rem,
-  h4: 2rem,
-  h5: 2rem,
-  h6: 2rem,
-  p: 2rem,
-  small: 2rem,
-);
-$font-ascent: 1825;
-$font-descent: -443;
-$font-line-gap: 0;
-$font-units-per-em: 2048;
-$font-cap-height: 1467;
-$font-x-height: 1062;
-```
-
-## CLI Usage
-
-### New Format Commands
-
-```bash
-# Initialize new format configuration
-baseline-nudges init [name]
-
-# Generate tokens and HTML example
-baseline-nudges generate <config.json> [output-dir]
-
-# Examples
-baseline-nudges init my-typography
-baseline-nudges generate typography-config.json
-baseline-nudges generate typography-config.json output/
-```
-
-### Legacy Format Commands (Backward Compatibility)
-
-```bash
-# Initialize legacy format configuration (for existing projects)
-baseline-nudges init-legacy [name]
-
-# Generate SCSS file from legacy configuration
-baseline-nudges generate-legacy <config.json> [output.scss]
-
-# Watch mode for legacy format
-baseline-nudges watch <config.json> [output.scss]
-```
+The setup process automatically downloads Fira Sans in TTF format for maximum compatibility.
 
 ## JavaScript API
 
-### New Format API
-
 ```javascript
-const { 
-  BaselineNudgeGenerator, 
-  generateFromConfig, 
-  generateTokens, 
-  generateHTML 
-} = require('@lyubomir-popov/baseline-nudge-generator');
+const {
+  BaselineNudgeGenerator,
+  generateFromConfig,
+} = require("@lyubomir-popov/baseline-nudge-generator");
 
 // Generate from config file
-const result = await generateFromConfig('./typography.json', './output');
+const result = await generateFromConfig(
+  "./config/typography-config.json",
+  "./dist"
+);
 
-// Generate tokens from config object
-const config = {
-  font: "Inter",
-  baselineUnit: 0.5,
-  fontFile: "your-font.woff2",
-  elements: [
-    { classname: "h1", fontSize: 4, lineHeight: 8.5 },
-    { classname: "body-text", fontSize: 1, lineHeight: 3 }
-  ]
-};
-const tokens = generateTokens(config);
-
-// Generate HTML from tokens
-const html = generateHTML(tokens);
-```
-
-### Legacy API
-
-```javascript
-const { BaselineNudgeGenerator } = require('@lyubomir-popov/baseline-nudge-generator');
-
+// Or use the class directly
 const generator = new BaselineNudgeGenerator();
-
-// Generate SCSS (legacy)
-generator.generateFile('./config.json', './output.scss');
-
-// Watch for changes (legacy)
-generator.watch('./config.json', './output.scss');
+const result = await generator.generateFiles(
+  "./config/typography-config.json",
+  "./dist"
+);
 ```
 
-## Testing the Package
-
-### Complete test example:
+## CLI Commands
 
 ```bash
-# 1. Create test directory
-mkdir baseline-test && cd baseline-test
+# Setup project with font download
+baseline-nudges setup
 
-# 2. Install package
-npm install -g @lyubomir-popov/baseline-nudge-generator
+# Generate tokens and HTML demo
+baseline-nudges generate config/typography-config.json
 
-# 3. Initialize config
-baseline-nudges init test-typography
+# Generate to specific output directory
+baseline-nudges generate config/typography-config.json custom-output/
 
-# 4. Download font file (for testing)
-curl -o Inter-Regular.woff2 "https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Regular.woff2"
-
-# 5. Update config to use the downloaded font
-# Edit test-typography.json and change "fontFile": "your-font.woff2" to "fontFile": "Inter-Regular.woff2"
-
-# 6. Generate tokens and HTML
-baseline-nudges generate test-typography.json
-
-# 7. View results
-open index.html
+# Show help
+baseline-nudges --help
 ```
-
-### What to look for in the HTML output:
-- Red baseline grid lines when "Toggle Baseline Grid" is clicked
-- Text should align perfectly to the grid lines
-- Font metrics panel shows actual values from your font file
-- Each element shows its calculated nudge value
-- No warning messages (all metrics are from font file)
-
-## Error Handling
-
-The tool will error out in these cases:
-
-**No font file specified:**
-```
-Error: Font file is required. Add "fontFile": "your-font.woff2" to your config file.
-```
-
-**Font file not found:**
-```
-Error: Font file not found: Inter-Regular.woff2
-Checked directory: /path/to/your/directory
-Supported formats: .woff2, .woff, .ttf, .otf
-
-Please ensure your font file is in the same directory as your config file.
-```
-
-**Font file can't be read:**
-```
-Error: Could not read font metrics from font.woff2: [detailed error]
-```
-
-## Integration with Design Systems
-
-Use the generated tokens in your CSS:
-
-```css
-/* Example: Using tokens in CSS */
-.h1 {
-  font-family: 'Inter', sans-serif;
-  font-size: 3rem;                 /* From tokens.elements.h1.fontSize */
-  line-height: 3rem;               /* From tokens.elements.h1.lineHeight */
-  padding-top: 0.182rem;           /* From tokens.elements.h1.nudgeTop */
-  margin-bottom: 1.818rem;         /* spaceAfter - nudgeTop */
-}
-```
-
-Convert to CSS custom properties:
-```css
-:root {
-  --h1-font-size: 3rem;
-  --h1-line-height: 3rem;
-  --h1-nudge-top: 0.182rem;
-  --h1-margin-bottom: 1.818rem;
-}
-```
-
-## How Baseline Alignment Works
-
-1. **Font metrics extraction**: Reads ascent, descent, unitsPerEm from font file
-2. **Baseline calculation**: Calculates where text naturally sits vs. where it should sit
-3. **Nudge computation**: Determines padding-top needed to align text to baseline grid
-4. **Spacing adjustment**: Adjusts margin-bottom to maintain proper spacing
-
-Formula: `nudge = ceil(baselineOffset / baselineUnit) * baselineUnit - baselineOffset`
 
 ## Requirements
 
@@ -605,4 +320,4 @@ Issues and pull requests are welcome. Please ensure your contributions include t
 
 - [Vanilla Framework](https://vanillaframework.io) - The CSS framework this tool originally supported
 - [OpenType.js](https://opentype.js.org/) - Font parsing library used for metrics extraction
-- [Inter Font](https://rsms.github.io/inter/) - Used in examples and testing 
+- [Inter Font](https://rsms.github.io/inter/) - Used in examples and testing
