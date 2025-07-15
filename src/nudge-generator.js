@@ -317,6 +317,7 @@ class BaselineNudgeGenerator {
     const { baselineUnit, elements, fontFile } = config;
     const tokens = {
       font: this.fontMetrics.fontName || 'Unknown Font',
+      fontWeight: this.fontMetrics.fontWeight || 400,
       baselineUnit: `${baselineUnit}rem`,
       fontFile: fontFile,
       elements: {}
@@ -336,6 +337,7 @@ class BaselineNudgeGenerator {
       tokens.elements[cleanName] = {
         fontSize: `${fontSizeRem}rem`,
         lineHeight: `${lineHeightRem * baselineUnit}rem`,
+        fontWeight: this.fontMetrics.fontWeight || 400,
         spaceAfter: `${spaceAfterRem}rem`,
         nudgeTop: `${nudgeTop}rem`
       };
@@ -392,6 +394,7 @@ body {
 
 body {
   font-family: '${font}', sans-serif;
+  font-weight: ${tokens.fontWeight};
   margin: 0;
   padding: 0;
   background: white;
@@ -425,6 +428,7 @@ body.u-baseline-grid::after {
 .${identifier} {
   font-size: ${props.fontSize};
   line-height: ${props.lineHeight};
+  font-weight: ${props.fontWeight};
   padding-top: ${props.nudgeTop};
   margin-bottom: ${marginBottom}rem;
   margin-top: 0;
@@ -641,6 +645,7 @@ Please ensure your font file is in the same directory as your config file.`, con
         `$font-units-per-em: ${this.fontMetrics.unitsPerEm};`,
         `$font-cap-height: ${this.fontMetrics.capHeight};`,
         `$font-x-height: ${this.fontMetrics.xHeight};`,
+        `$font-weight: ${this.fontMetrics.fontWeight || 400};`,
         ''
       ].join('\n');
     } else {
@@ -662,6 +667,7 @@ Please ensure your font file is in the same directory as your config file.`, con
         `$font-units-per-em: ${this.fontMetrics.unitsPerEm};`,
         `$font-cap-height: ${this.fontMetrics.capHeight};`,
         `$font-x-height: ${this.fontMetrics.xHeight};`,
+        `$font-weight: ${this.fontMetrics.fontWeight || 400};`,
         ''
       ].join('\n');
     }

@@ -79,6 +79,7 @@ Design tokens with calculated nudge values for each typography element:
 ```json
 {
   "font": "Fira Sans",
+  "fontWeight": 400,
   "baselineUnit": 0.5,
   "fontFile": "../fonts/FiraSans-Regular.ttf",
   "elements": [
@@ -86,6 +87,7 @@ Design tokens with calculated nudge values for each typography element:
       "identifier": "h1",
       "fontSize": 2.5,
       "lineHeight": 2.5,
+      "fontWeight": 400,
       "paddingTop": 0.375,
       "marginBottom": 1.625
     }
@@ -118,6 +120,7 @@ tokens.elements.forEach(element => {
 .${element.identifier} {
   font-size: ${element.fontSize}rem;
   line-height: ${element.lineHeight}rem;
+  font-weight: ${element.fontWeight};
   padding-top: ${element.paddingTop}rem;
   margin-bottom: ${element.marginBottom}rem;
 }
@@ -129,6 +132,7 @@ Perfect for design systems that need precise typographic alignment.
 
 ## What's New
 
+- **Font-weight extraction:** Automatically extracts font-weight from font files to override browser defaults
 - **One-command setup:** Run `baseline-nudges setup` to download font and create config automatically
 - **Reliable font source:** Uses Fira Sans from Google Fonts GitHub mirror (won't break)
 - **Automatic font name extraction:** Extracts font name from TTF/WOFF files automatically
