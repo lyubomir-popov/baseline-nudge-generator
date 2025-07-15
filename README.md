@@ -220,12 +220,7 @@ After running `baseline-nudges setup`, you can replace the downloaded font:
    {
      "baselineUnit": 0.5,
      "fontFile": "../fonts/YourFont-Regular.ttf",
-     "elements": [
-       {       "identifier": "h1",
-       "fontSize": 2.5,
-       "lineHeight": 5
-     }
-     ]
+     "elements": [{ "identifier": "h1", "fontSize": 2.5, "lineHeight": 5 }]
    }
    ```
 
