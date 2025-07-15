@@ -1,12 +1,47 @@
 # @lyubomir-popov/baseline-nudge-generator
 
-Automatic font metrics reader that generates baseline grid nudges for CSS typogr3. **Regenerate with your font:**
+Automatic font metrics reader that generates baseline grid nudges for CSS typography. Extracts precise font metrics from webfont files and calculates the exact CSS nudges needed to align text to a baseline grid.
 
-```bash
-baseline-nudges generate config/typography-config.json
+## Quick Start
+
+1. **Install the package:**
+   ```bash
+   npm install -g @lyubomir-popov/baseline-nudge-generator
+   ```
+
+2. **Set up your project (one command does it all):**
+   ```bash
+   baseline-nudges setup
+   ```
+
+3. **Generate tokens and HTML:**
+   ```bash
+   baseline-nudges generate config/typography-config.json
+   ```
+
+4. **View the result:**
+   ```bash
+   open dist/index.html
+   ```
+
+## What's New in This Version
+
+- **🔧 Fixed critical baseline calculation bug**: Corrected lineGap distribution formula for accurate baseline alignment
+- **📏 Improved baseline offset calculation**: Now properly distributes lineGap above and below text baseline
+- **🎨 Complete typescale support**: Full h1-h6 and paragraph element configuration
+- **🧹 Production-ready code**: Removed debug outputs, added ESLint, improved error handling
+- **🔤 Enhanced font name extraction**: Robust font name detection from various font formats
+- **📝 Better HTML examples**: Improved sample text format and visual presentation
+
+## How It Works
+
+The tool uses the **corrected baseline calculation formula**:
+
+```
+baselineOffsetRem = leadingRem/2 + ascenderRem + (lineGapRem/2)
 ```
 
-The font name will be automatically extracted from your font file and used in the generated HTML and CSS.
+This ensures that lineGap is properly distributed above and below the text baseline, fixing previous calculation errors that caused misalignment.
 
 ## Configuration Format
 
@@ -19,9 +54,15 @@ The `typography-config.json` file defines your typography scale and baseline gri
   "elements": [
     {
       "identifier": "h1",
-      "fontSize": 2.5,
-      "lineHeight": 5,
-      "spaceAfter": 4
+      "fontSize": 5.25,
+      "lineHeight": 10,
+      "spaceAfter": 3
+    },
+    {
+      "identifier": "h2",
+      "fontSize": 3.9375,
+      "lineHeight": 8,
+      "spaceAfter": 3
     },
     {
       "identifier": "p",
@@ -80,18 +121,24 @@ Design tokens with calculated nudge values for each typography element:
 {
   "font": "Fira Sans",
   "fontWeight": 400,
-  "baselineUnit": 0.5,
+  "baselineUnit": "0.5rem",
   "fontFile": "../fonts/FiraSans-Regular.ttf",
-  "elements": [
-    {
-      "identifier": "h1",
-      "fontSize": 2.5,
-      "lineHeight": 2.5,
+  "elements": {
+    "h1": {
+      "fontSize": "5.25rem",
+      "lineHeight": "5rem",
       "fontWeight": 400,
-      "paddingTop": 0.375,
-      "marginBottom": 1.625
+      "spaceAfter": "1.5rem",
+      "nudgeTop": "0.19065rem"
+    },
+    "p": {
+      "fontSize": "1rem",
+      "lineHeight": "1.5rem",
+      "fontWeight": 400,
+      "spaceAfter": "1.5rem",
+      "nudgeTop": "0.415rem"
     }
-  ]
+  }
 }
 ```
 
@@ -111,33 +158,42 @@ Copy of your font file for the HTML demo to work offline.
 
 Import the tokens into your CSS build process or design system:
 
-````javascript
+```javascript
 const tokens = require('./dist/tokens.json');
 
 // Generate CSS
-tokens.elements.forEach(element => {
+Object.entries(tokens.elements).forEach(([identifier, element]) => {
+  const nudgeTopValue = parseFloat(element.nudgeTop);
+  const spaceAfterValue = parseFloat(element.spaceAfter);
+  const marginBottom = spaceAfterValue - nudgeTopValue;
+  
   console.log(`
-.${element.identifier} {
-  font-size: ${element.fontSize}rem;
-  line-height: ${element.lineHeight}rem;
+.${identifier} {
+  font-size: ${element.fontSize};
+  line-height: ${element.lineHeight};
   font-weight: ${element.fontWeight};
-  padding-top: ${element.paddingTop}rem;
-  margin-bottom: ${element.marginBottom}rem;
+  padding-top: ${element.nudgeTop};
+  margin-bottom: ${marginBottom}rem;
+  margin-top: 0;
 }
   `);
 });
 ```
 
-Perfect for design systems that need precise typographic alignment.
+Perfect for design systems that need precise typographic alignment with proper baseline grid spacing.
 
-## What's New
+## Key Features
 
-- **Font-weight extraction:** Automatically extracts font-weight from font files to override browser defaults
-- **One-command setup:** Run `baseline-nudges setup` to download font and create config automatically
-- **Reliable font source:** Uses Fira Sans from Google Fonts GitHub mirror (won't break)
-- **Automatic font name extraction:** Extracts font name from TTF/WOFF files automatically
-- **Simplified format support:** TTF, WOFF, OTF supported (WOFF2 removed for reliability)
-- **Out-of-the-box experience:** No manual font file management needed
+- **🔧 Corrected baseline calculation** - Fixed critical lineGap distribution bug for accurate alignment
+- **📏 Precise font metrics reading** - Extracts exact metrics from TTF, WOFF, and OTF files
+- **🎨 Complete typescale support** - Full h1-h6 and paragraph element configuration
+- **🔤 Automatic font name extraction** - Robust font name detection from various font formats
+- **🎯 Baseline nudge calculation** - Generates precise CSS nudges for baseline grid alignment
+- **📱 Responsive baseline grids** - Handles tight line-heights with negative nudge compensation
+- **🎭 Interactive HTML demos** - Visual examples with baseline grid overlay
+- **🧹 Production-ready code** - Clean, ESLint-compliant codebase without debug outputs
+- **🔄 CLI and API access** - Command-line tool and programmatic JavaScript API
+- **⚡ One-command setup** - `baseline-nudges setup` downloads font and creates config automatically
 
 ## Features
 
@@ -268,10 +324,16 @@ The tool supports various font formats:
 - **TTF (TrueType)** - Recommended for best compatibility
 - **WOFF (Web Open Font Format)** - Good compatibility
 - **OTF (OpenType)** - Good compatibility
+- **WOFF2** - Supported via automatic decompression to TTF
 
-### ❌ Not Supported
+### 🔧 WOFF2 Decompression
 
-- **WOFF2** - Removed for reliability (use TTF/WOFF instead)
+WOFF2 files are automatically decompressed to TTF format for processing:
+
+```bash
+# Decompress WOFF2 manually if needed
+baseline-nudges decompress-woff2 input.woff2 output.ttf
+```
 
 The setup process automatically downloads Fira Sans in TTF format for maximum compatibility.
 
@@ -309,8 +371,26 @@ baseline-nudges generate config/typography-config.json
 # Generate to specific output directory
 baseline-nudges generate config/typography-config.json custom-output/
 
+# Create example configuration (downloads font automatically)
+baseline-nudges init
+
+# Create example configuration with custom name
+baseline-nudges init my-typography
+
+# Validate configuration file
+baseline-nudges validate config/typography-config.json
+
+# Legacy SCSS generation (backward compatibility)
+baseline-nudges generate-legacy config/typography-config.json output.scss
+
+# Watch mode for legacy SCSS (automatic regeneration)
+baseline-nudges watch config/typography-config.json output.scss
+
 # Show help
 baseline-nudges --help
+
+# Show version
+baseline-nudges --version
 ```
 
 ## Requirements
