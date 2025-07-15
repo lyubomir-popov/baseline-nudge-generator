@@ -405,6 +405,7 @@ body {
   background: white;
   color: #333;
   position: relative;
+  min-height: 100vh;
 }
 
 ${this.generateBaselineGridCSS(parseFloat(baselineUnit))}

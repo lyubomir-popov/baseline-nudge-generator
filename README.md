@@ -143,6 +143,7 @@ Perfect for design systems that need precise typographic alignment.
 
 - **Font metrics reading** - Extracts precise metrics from webfont files (TTF, WOFF, OTF)
 - **Baseline nudge calculation** - Generates precise CSS nudges for baseline grid alignment
+- **Tight line-height support** - Handles negative nudges by moving to next grid line, ensuring all padding-top values are positive
 - **JSON token generation** - Outputs design tokens with nudge values for each typography element
 - **HTML example generation** - Creates a visual example page with baseline grid overlay
 - **Flexible input format** - Accepts typography triplets (classname, font-size, line-height)
