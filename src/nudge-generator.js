@@ -273,7 +273,12 @@ class BaselineNudgeGenerator {
     const lineHeightAbsoluteRem = lineHeightRem * baselineUnitRem;
     const leadingRem = lineHeightAbsoluteRem - contentAreaRem;
     const baselineOffsetRem = leadingRem / 2 + effectiveAscenderRem;
-    const nudgeRem = (Math.ceil(baselineOffsetRem / baselineUnitRem) * baselineUnitRem) - baselineOffsetRem;
+    let nudgeRem = (Math.ceil(baselineOffsetRem / baselineUnitRem) * baselineUnitRem) - baselineOffsetRem;
+
+    // Fix negative nudges by moving to next grid line
+    if (nudgeRem < 0) {
+      nudgeRem = nudgeRem + baselineUnitRem;
+    }
 
     // Add compensation for 1px drift by slightly reducing the nudge
     // Convert 1px to rem (assuming 16px root font size) and subtract a fraction of it

@@ -57,39 +57,39 @@ function createTypographyConfig(fontFilename) {
     "elements": [
       {
         "identifier": "h1",
-        "fontSize": 2.5,
-        "lineHeight": 5,
-        "spaceAfter": 4
+        "fontSize": 5.25,
+        "lineHeight": 10,
+        "spaceAfter": 3
       },
       {
         "identifier": "h2",
-        "fontSize": 2,
-        "lineHeight": 4,
-        "spaceAfter": 4
+        "fontSize": 3.9375,
+        "lineHeight": 8,
+        "spaceAfter": 3
       },
       {
         "identifier": "h3",
-        "fontSize": 1.5,
-        "lineHeight": 3,
-        "spaceAfter": 4
+        "fontSize": 3,
+        "lineHeight": 6,
+        "spaceAfter": 3
       },
       {
         "identifier": "h4",
-        "fontSize": 1.25,
-        "lineHeight": 3,
-        "spaceAfter": 4
+        "fontSize": 2.25,
+        "lineHeight": 5,
+        "spaceAfter": 3
       },
       {
         "identifier": "h5",
-        "fontSize": 1.125,
-        "lineHeight": 3,
-        "spaceAfter": 4
+        "fontSize": 1.75,
+        "lineHeight": 4,
+        "spaceAfter": 3
       },
       {
         "identifier": "h6",
-        "fontSize": 1,
-        "lineHeight": 2,
-        "spaceAfter": 4
+        "fontSize": 1.3125,
+        "lineHeight": 3,
+        "spaceAfter": 3
       },
       {
         "identifier": "p",
