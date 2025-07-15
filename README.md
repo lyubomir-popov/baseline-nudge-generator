@@ -18,13 +18,13 @@ The `typography-config.json` file defines your typography scale and baseline gri
   "fontFile": "../fonts/FiraSans-Regular.ttf",
   "elements": [
     {
-      "classname": "h1",
+      "identifier": "h1",
       "fontSize": 2.5,
       "lineHeight": 5,
       "spaceAfter": 4
     },
     {
-      "classname": "p",
+      "identifier": "p",
       "fontSize": 1,
       "lineHeight": 3,
       "spaceAfter": 3
@@ -43,7 +43,7 @@ The `typography-config.json` file defines your typography scale and baseline gri
 
 Each element in the `elements` array has these properties:
 
-- **`classname`** (string): CSS class name for the element (e.g., "h1", "p", "caption").
+- **`identifier`** (string): Element identifier or CSS class name (e.g., "h1", "p", "caption", ".heading-large").
 - **`fontSize`** (number): Font size in rem units (e.g., 2.5 = 2.5rem).
 - **`lineHeight`** (integer): Number of baseline units for line height (e.g., 5 = 5 × 0.5rem = 2.5rem).
 - **`spaceAfter`** (integer): Number of baseline units for space after the element (e.g., 4 = 4 × 0.5rem = 2rem). Note: The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
@@ -83,7 +83,7 @@ Design tokens with calculated nudge values for each typography element:
   "fontFile": "../fonts/FiraSans-Regular.ttf",
   "elements": [
     {
-      "classname": "h1",
+      "identifier": "h1",
       "fontSize": 2.5,
       "lineHeight": 2.5,
       "paddingTop": 0.375,
@@ -115,7 +115,7 @@ const tokens = require('./dist/tokens.json');
 // Generate CSS
 tokens.elements.forEach(element => {
   console.log(`
-.${element.classname} {
+.${element.identifier} {
   font-size: ${element.fontSize}rem;
   line-height: ${element.lineHeight}rem;
   padding-top: ${element.paddingTop}rem;
@@ -123,7 +123,9 @@ tokens.elements.forEach(element => {
 }
   `);
 });
-```ystems. Perfect for design systems that need precise typographic alignment.
+```
+
+Perfect for design systems that need precise typographic alignment.
 
 ## What's New
 
@@ -219,11 +221,10 @@ After running `baseline-nudges setup`, you can replace the downloaded font:
      "baselineUnit": 0.5,
      "fontFile": "../fonts/YourFont-Regular.ttf",
      "elements": [
-       {
-         "classname": "h1",
-         "fontSize": 2.5,
-         "lineHeight": 5
-       }
+       {       "identifier": "h1",
+       "fontSize": 2.5,
+       "lineHeight": 5
+     }
      ]
    }
    ```
@@ -236,13 +237,13 @@ After running `baseline-nudges setup`, you can replace the downloaded font:
    {
      "elements": [
        {
-         "classname": "h1", // CSS class name (can be "h1", ".heading-1", etc.)
+         "identifier": "h1", // Element identifier or CSS class name
          "fontSize": 3, // Font size in rem
          "lineHeight": 6, // Line height in baseline units (6 × 0.5rem = 3rem)
          "spaceAfter": 5 // Space after in baseline units (5 × 0.5rem = 2.5rem)
        },
        {
-         "classname": "body-text",
+         "identifier": "body-text",
          "fontSize": 1,
          "lineHeight": 3,
          "spaceAfter": 3

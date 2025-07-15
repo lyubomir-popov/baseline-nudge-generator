@@ -323,14 +323,14 @@ class BaselineNudgeGenerator {
     };
 
     for (const element of elements) {
-      const { classname, tag, fontSize, lineHeight, spaceAfter } = element;
+      const { identifier, classname, tag, fontSize, lineHeight, spaceAfter } = element;
       const fontSizeRem = fontSize;
       const lineHeightRem = lineHeight;
       const nudgeTop = this.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
       const spaceAfterRem = (spaceAfter || 4) * baselineUnit; // Default to 4 baseline units if not specified
 
-      // Use classname if available, otherwise use tag, otherwise fallback to 'element'
-      const elementName = classname || tag || 'element';
+      // Use identifier if available, otherwise use classname (backward compatibility), otherwise use tag, otherwise fallback to 'element'
+      const elementName = identifier || classname || tag || 'element';
       const cleanName = this.cleanClassname(elementName);
 
       tokens.elements[cleanName] = {
@@ -416,13 +416,13 @@ body.u-baseline-grid::after {
 }
 `;
 
-    for (const [classname, props] of Object.entries(elements)) {
+    for (const [identifier, props] of Object.entries(elements)) {
       const nudgeTopValue = parseFloat(props.nudgeTop);
       const spaceAfterValue = parseFloat(props.spaceAfter);
       const marginBottom = spaceAfterValue - nudgeTopValue;
 
       styles += `
-.${classname} {
+.${identifier} {
   font-size: ${props.fontSize};
   line-height: ${props.lineHeight};
   padding-top: ${props.nudgeTop};
@@ -448,18 +448,18 @@ body.u-baseline-grid::after {
 <body class="u-baseline-grid">
 `;
 
-    for (const [classname, props] of Object.entries(elements)) {
+    for (const [identifier, props] of Object.entries(elements)) {
       const nudgeTopValue = parseFloat(props.nudgeTop);
       const spaceAfterValue = parseFloat(props.spaceAfter);
       const marginBottom = spaceAfterValue - nudgeTopValue;
 
-      // Determine the HTML tag to use based on classname
-      const isHeading = /^h[1-6]$/.test(classname);
-      const tag = isHeading ? classname : 'p';
+      // Determine the HTML tag to use based on identifier
+      const isHeading = /^h[1-6]$/.test(identifier);
+      const tag = isHeading ? identifier : 'p';
 
       htmlContent += `
-  <${tag} class="${classname}">
-    ${isHeading ? `This is a ${classname.toUpperCase()} heading` : `This is sample text using the "${classname}" class.`}
+  <${tag} class="${identifier}">
+    ${isHeading ? `This is a ${identifier.toUpperCase()} heading` : `This is sample text using the "${identifier}" class.`}
   </${tag}>
 `;
     }

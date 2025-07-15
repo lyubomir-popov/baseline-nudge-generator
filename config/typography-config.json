@@ -3,43 +3,43 @@
   "fontFile": "../fonts/FiraSans-Regular.ttf",
   "elements": [
     {
-      "classname": "h1",
+      "identifier": "h1",
       "fontSize": 2.5,
       "lineHeight": 5,
       "spaceAfter": 4
     },
     {
-      "classname": "h2",
+      "identifier": "h2",
       "fontSize": 2,
       "lineHeight": 4,
       "spaceAfter": 4
     },
     {
-      "classname": "h3",
+      "identifier": "h3",
       "fontSize": 1.5,
       "lineHeight": 3,
       "spaceAfter": 4
     },
     {
-      "classname": "h4",
+      "identifier": "h4",
       "fontSize": 1.25,
       "lineHeight": 3,
       "spaceAfter": 4
     },
     {
-      "classname": "h5",
+      "identifier": "h5",
       "fontSize": 1.125,
       "lineHeight": 3,
       "spaceAfter": 4
     },
     {
-      "classname": "h6",
+      "identifier": "h6",
       "fontSize": 1,
       "lineHeight": 2,
       "spaceAfter": 4
     },
     {
-      "classname": "p",
+      "identifier": "p",
       "fontSize": 1,
       "lineHeight": 3,
       "spaceAfter": 3

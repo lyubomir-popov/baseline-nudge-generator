@@ -52,9 +52,12 @@ function validateConfig(config, configPath = '') {
       config.elements.forEach((element, index) => {
         const prefix = `elements[${index}]`;
 
-        if (!element.classname) {
-          errors.push(`${prefix}.classname is required`);
-        } else if (typeof element.classname !== 'string') {
+        // Support both 'identifier' (new) and 'classname' (legacy) for backward compatibility
+        if (!element.identifier && !element.classname) {
+          errors.push(`${prefix}.identifier is required`);
+        } else if (element.identifier && typeof element.identifier !== 'string') {
+          errors.push(`${prefix}.identifier must be a string`);
+        } else if (element.classname && typeof element.classname !== 'string') {
           errors.push(`${prefix}.classname must be a string`);
         }
 
