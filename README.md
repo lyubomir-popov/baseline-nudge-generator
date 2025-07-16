@@ -5,16 +5,19 @@ Automatic font metrics reader that generates baseline grid nudges for CSS typogr
 ## Quick Start
 
 1. **Install the package:**
+
    ```bash
    npm install -g @lyubomir-popov/baseline-nudge-generator
    ```
 
 2. **Set up your project (one command does it all):**
+
    ```bash
    baseline-nudges setup
    ```
 
 3. **Generate tokens and HTML:**
+
    ```bash
    baseline-nudges generate config/typography-config.json
    ```
@@ -159,14 +162,14 @@ Copy of your font file for the HTML demo to work offline.
 Import the tokens into your CSS build process or design system:
 
 ```javascript
-const tokens = require('./dist/tokens.json');
+const tokens = require("./dist/tokens.json");
 
 // Generate CSS
 Object.entries(tokens.elements).forEach(([identifier, element]) => {
   const nudgeTopValue = parseFloat(element.nudgeTop);
   const spaceAfterValue = parseFloat(element.spaceAfter);
   const marginBottom = spaceAfterValue - nudgeTopValue;
-  
+
   console.log(`
 .${identifier} {
   font-size: ${element.fontSize};
@@ -199,7 +202,7 @@ Perfect for design systems that need precise typographic alignment with proper b
 
 ```bash
 npm install -g @lyubomir-popov/baseline-nudge-generator
-````
+```
 
 Or for local project use:
 

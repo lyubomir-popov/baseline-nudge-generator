@@ -16,7 +16,6 @@
   "scripts": {
     "start": "node bin/baseline-nudges.js",
     "setup": "node scripts/setup.js",
-    "test": "node test/test-runner.js",
     "lint": "eslint src/ bin/ --fix",
     "lint:check": "eslint src/ bin/",
     "validate": "node -e \"const {validateConfigFile} = require('./src/config-validator'); console.log(validateConfigFile('./config/typography-config.json'))\"",
