@@ -125,37 +125,88 @@ class BaselineNudgeGenerator {
     }
 
     // Generate tokens from new input format
-    generateTokens(config) {
-        const { baselineUnit, elements, fontFile } = config;
-        const tokens = {
-            font: this.fontMetrics.fontName || 'Unknown Font',
-            fontWeight: this.fontMetrics.fontWeight || 400,
-            baselineUnit: `${baselineUnit}rem`,
-            fontFile: fontFile,
-            elements: {}
-        };
-
-        for (const element of elements) {
-            const { identifier, classname, tag, fontSize, lineHeight, spaceAfter } = element;
-            const fontSizeRem = fontSize;
-            const lineHeightRem = lineHeight;
-            const nudgeTop = this.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
-            const spaceAfterRem = (spaceAfter || 4) * baselineUnit; // Default to 4 baseline units if not specified
-
-            // Use identifier if available, otherwise use classname (backward compatibility), otherwise use tag, otherwise fallback to 'element'
-            const elementName = identifier || classname || tag || 'element';
-            const cleanName = this.cleanClassname(elementName);
-
-            tokens.elements[cleanName] = {
-                fontSize: `${fontSizeRem}rem`,
-                lineHeight: `${lineHeightRem * baselineUnit}rem`,
-                fontWeight: this.fontMetrics.fontWeight || 400,
-                spaceAfter: `${spaceAfterRem}rem`,
-                nudgeTop: `${nudgeTop}rem`
+    generateTokens(config, fontMetricsMap = null) {
+        const { baselineUnit, elements, fontFile, fontFiles } = config;
+        
+        // Determine if we're using the new multi-font format or legacy single-font format
+        const isMultiFont = fontFiles && fontMetricsMap;
+        
+        if (isMultiFont) {
+            // New format with multiple fonts
+            const tokens = {
+                baselineUnit: `${baselineUnit}rem`,
+                fontFiles: fontFiles,
+                elements: {}
             };
-        }
 
-        return tokens;
+            for (const element of elements) {
+                const { identifier, classname, tag, fontSize, lineHeight, spaceAfter, fontFamily, fontWeight, fontStyle } = element;
+                const fontSizeRem = fontSize;
+                const lineHeightRem = lineHeight;
+                
+                // Get the appropriate font metrics for this element
+                const elementFontFamily = fontFamily || 'sans'; // Default to sans if not specified
+                const elementFontWeight = fontWeight || 400; // Default to 400 if not specified
+                const elementFontStyle = fontStyle || 'normal'; // Default to normal if not specified
+                
+                const fontMetrics = fontMetricsMap[elementFontFamily];
+                if (!fontMetrics) {
+                    throw new Error(`Font family "${elementFontFamily}" not found in fontMetricsMap. Available: ${Object.keys(fontMetricsMap).join(', ')}`);
+                }
+                
+                // Create a temporary instance with the specific font metrics for calculation
+                const tempGenerator = new BaselineNudgeGenerator(fontMetrics);
+                const nudgeTop = tempGenerator.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
+                const spaceAfterRem = (spaceAfter || 4) * baselineUnit; // Default to 4 baseline units if not specified
+
+                // Use identifier if available, otherwise use classname (backward compatibility), otherwise use tag, otherwise fallback to 'element'
+                const elementName = identifier || classname || tag || 'element';
+                const cleanName = this.cleanClassname(elementName);
+
+                tokens.elements[cleanName] = {
+                    fontSize: `${fontSizeRem}rem`,
+                    lineHeight: `${lineHeightRem * baselineUnit}rem`,
+                    fontFamily: elementFontFamily,
+                    fontWeight: elementFontWeight,
+                    fontStyle: elementFontStyle,
+                    spaceAfter: `${spaceAfterRem}rem`,
+                    nudgeTop: `${nudgeTop}rem`
+                };
+            }
+
+            return tokens;
+        } else {
+            // Legacy format with single font
+            const tokens = {
+                font: this.fontMetrics.fontName || 'Unknown Font',
+                fontWeight: this.fontMetrics.fontWeight || 400,
+                baselineUnit: `${baselineUnit}rem`,
+                fontFile: fontFile,
+                elements: {}
+            };
+
+            for (const element of elements) {
+                const { identifier, classname, tag, fontSize, lineHeight, spaceAfter } = element;
+                const fontSizeRem = fontSize;
+                const lineHeightRem = lineHeight;
+                const nudgeTop = this.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
+                const spaceAfterRem = (spaceAfter || 4) * baselineUnit; // Default to 4 baseline units if not specified
+
+                // Use identifier if available, otherwise use classname (backward compatibility), otherwise use tag, otherwise fallback to 'element'
+                const elementName = identifier || classname || tag || 'element';
+                const cleanName = this.cleanClassname(elementName);
+
+                tokens.elements[cleanName] = {
+                    fontSize: `${fontSizeRem}rem`,
+                    lineHeight: `${lineHeightRem * baselineUnit}rem`,
+                    fontWeight: this.fontMetrics.fontWeight || 400,
+                    spaceAfter: `${spaceAfterRem}rem`,
+                    nudgeTop: `${nudgeTop}rem`
+                };
+            }
+
+            return tokens;
+        }
     }
 
     // Generate baseline grid CSS
@@ -191,22 +242,51 @@ body {
     }
 
     // Generate HTML example page
-    generateHTML(tokens) {
-        const { font, baselineUnit, elements } = tokens;
-        const fontFileName = path.basename(tokens.fontFile);
-
+    generateHTML(tokens, fontMetricsMap = null) {
+        const { baselineUnit, elements, font, fontFile, fontFiles } = tokens;
+        
+        // Determine if we're using the new multi-font format or legacy single-font format
+        const isMultiFont = fontFiles && fontMetricsMap;
+        
         let styles = `
 <style>
+`;
+
+        if (isMultiFont) {
+            // New format with multiple fonts
+            for (const fontFile of fontFiles) {
+                const fontFileName = path.basename(fontFile.path);
+                const fontMetrics = fontMetricsMap[fontFile.family];
+                
+                styles += `
+@font-face {
+  font-family: '${fontMetrics.fontName}';
+  src: url('fonts/${fontFileName}') format('${this.getFontFormat(fontFile.path)}');
+}
+`;
+            }
+        } else {
+            // Legacy format with single font
+            const fontFileName = path.basename(fontFile);
+            styles += `
 @font-face {
   font-family: '${font}';
-  src: url('fonts/${fontFileName}') format('${this.getFontFormat(tokens.fontFile)}');
+  src: url('fonts/${fontFileName}') format('${this.getFontFormat(fontFile)}');
   font-weight: normal;
   font-style: normal;
 }
+`;
+        }
 
+        // Default body styles
+        const defaultFontFamily = isMultiFont ? 
+            (fontMetricsMap['sans'] ? fontMetricsMap['sans'].fontName : Object.values(fontMetricsMap)[0].fontName) : 
+            font;
+        
+        styles += `
 body {
-  font-family: '${font}', sans-serif;
-  font-weight: ${tokens.fontWeight};
+  font-family: '${defaultFontFamily}', sans-serif;
+  font-weight: 400;
   margin: 0;
   padding: 0;
   background: white;
@@ -237,7 +317,28 @@ body.u-baseline-grid::after {
             const spaceAfterValue = parseFloat(props.spaceAfter);
             const marginBottom = spaceAfterValue - nudgeTopValue;
 
-            styles += `
+            if (isMultiFont) {
+                // New format with font family, weight, and style
+                const fontFamily = props.fontFamily || 'sans';
+                const fontWeight = props.fontWeight || 400;
+                const fontStyle = props.fontStyle || 'normal';
+                const fontMetrics = fontMetricsMap[fontFamily];
+                
+                styles += `
+.${identifier} {
+  font-size: ${props.fontSize};
+  line-height: ${props.lineHeight};
+  font-family: '${fontMetrics.fontName}', sans-serif;
+  font-weight: ${fontWeight};
+  font-style: ${fontStyle};
+  padding-top: ${props.nudgeTop};
+  margin-bottom: ${marginBottom}rem;
+  margin-top: 0;
+}
+`;
+            } else {
+                // Legacy format
+                styles += `
 .${identifier} {
   font-size: ${props.fontSize};
   line-height: ${props.lineHeight};
@@ -247,6 +348,7 @@ body.u-baseline-grid::after {
   margin-top: 0;
 }
 `;
+            }
         }
 
         styles += `
@@ -265,13 +367,20 @@ body.u-baseline-grid::after {
 <body class="u-baseline-grid">
 `;
 
-        for (const [identifier] of Object.entries(elements)) {
+        for (const [identifier, props] of Object.entries(elements)) {
             // Determine the HTML tag to use based on identifier
             const isHeading = /^h[1-6]$/.test(identifier);
             const tag = isHeading ? identifier : 'p';
 
-            // Use the new format: This is an example of {identifier} using {font-name}.
-            const sampleText = `This is an example of ${identifier} using ${font}.`;
+            // Generate sample text based on format
+            let sampleText;
+            if (isMultiFont) {
+                const fontFamily = props.fontFamily || 'sans';
+                const fontMetrics = fontMetricsMap[fontFamily];
+                sampleText = `This is an example of ${identifier} using ${fontMetrics.fontName} (${fontFamily}).`;
+            } else {
+                sampleText = `This is an example of ${identifier} using ${font}.`;
+            }
 
             htmlContent += `
   <${tag} class="${identifier}">
@@ -290,7 +399,7 @@ body.u-baseline-grid::after {
 
     // Generate files from new input format
     async generateFiles(inputPath, outputDir = 'dist') {
-    // Validate configuration first
+        // Validate configuration first
         const validation = validateConfigFile(inputPath);
         if (!validation.isValid) {
             throw new ConfigurationError(
@@ -312,28 +421,67 @@ body.u-baseline-grid::after {
         const config = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
         const inputDir = path.dirname(inputPath);
 
-        // Font file is required
-        if (!config.fontFile) {
-            throw new ConfigurationError('Font file is required. Add "fontFile": "your-font.woff2" to your config file.', inputPath);
-        }
+        // Handle both single fontFile (legacy) and multiple fontFiles (new format)
+        let fontMetricsMap = {};
+        
+        if (config.fontFiles) {
+            // New format with multiple font files
+            for (const fontFile of config.fontFiles) {
+                const fontPath = this.findFontFile(inputDir, fontFile.path);
+                if (!fontPath) {
+                    throw new FontFileError(`Font file not found: ${fontFile.path}
+Checked directory: ${inputDir}
+Supported formats: .woff2, .woff, .ttf, .otf
 
-        const fontPath = this.findFontFile(inputDir, config.fontFile);
-        if (!fontPath) {
-            throw new FontFileError(`Font file not found: ${config.fontFile}
+Please ensure your font file is in the same directory as your config file.`, fontFile.path);
+                }
+
+                try {
+                    const metrics = await this.readFontMetrics(fontPath);
+                    const fontName = await this.extractFontName(metrics, fontPath);
+                    fontMetricsMap[fontFile.family] = {
+                        ...metrics,
+                        fontName: fontName,
+                        family: fontFile.family,
+                        path: fontFile.path
+                    };
+                } catch (error) {
+                    throw new FontMetricsError(`Failed to read font metrics for ${fontFile.family}: ${error.message}`, fontPath);
+                }
+            }
+        } else if (config.fontFile) {
+            // Legacy format with single font file
+            const fontPath = this.findFontFile(inputDir, config.fontFile);
+            if (!fontPath) {
+                throw new FontFileError(`Font file not found: ${config.fontFile}
 Checked directory: ${inputDir}
 Supported formats: .woff2, .woff, .ttf, .otf
 
 Please ensure your font file is in the same directory as your config file.`, config.fontFile);
+            }
+
+            try {
+                const metrics = await this.readFontMetrics(fontPath);
+                const fontName = await this.extractFontName(metrics, fontPath);
+                fontMetricsMap['default'] = {
+                    ...metrics,
+                    fontName: fontName,
+                    family: 'default',
+                    weight: 400,
+                    style: 'normal',
+                    path: config.fontFile
+                };
+                // Set the main fontMetrics for backward compatibility
+                this.fontMetrics = metrics;
+            } catch (error) {
+                throw new FontMetricsError(`Failed to read font metrics: ${error.message}`, fontPath);
+            }
+        } else {
+            throw new ConfigurationError('Either fontFile (legacy) or fontFiles (new format) is required.', inputPath);
         }
 
-        try {
-            this.fontMetrics = await this.readFontMetrics(fontPath);
-        } catch (error) {
-            throw new FontMetricsError(`Failed to read font metrics: ${error.message}`, fontPath);
-        }
-
-        const tokens = this.generateTokens(config);
-        const html = this.generateHTML(tokens);
+        const tokens = this.generateTokens(config, fontMetricsMap);
+        const html = this.generateHTML(tokens, fontMetricsMap);
 
         // Create output directory if it doesn't exist
         if (!fs.existsSync(outputDir)) {
@@ -350,21 +498,23 @@ Please ensure your font file is in the same directory as your config file.`, con
         fs.writeFileSync(htmlPath, html);
         console.log(`✅ Generated HTML example: ${htmlPath}`);
 
-        // Copy font file to dist folder for HTML demo
-        const fontSrcPath = path.resolve(path.dirname(inputPath), tokens.fontFile);
-        const fontFileName = path.basename(fontSrcPath);
+        // Copy font files to dist folder for HTML demo
         const fontDistDir = path.join(outputDir, 'fonts');
-        const fontDistPath = path.join(fontDistDir, fontFileName);
-
-        // Ensure fonts directory exists in dist
         if (!fs.existsSync(fontDistDir)) {
             fs.mkdirSync(fontDistDir, { recursive: true });
         }
 
-        // Copy font file
-        if (fs.existsSync(fontSrcPath)) {
-            fs.copyFileSync(fontSrcPath, fontDistPath);
-            console.log(`✅ Copied font: ${fontDistPath}`);
+        // Copy all font files
+        for (const fontFamily in fontMetricsMap) {
+            const fontMetrics = fontMetricsMap[fontFamily];
+            const fontSrcPath = path.resolve(path.dirname(inputPath), fontMetrics.path);
+            const fontFileName = path.basename(fontSrcPath);
+            const fontDistPath = path.join(fontDistDir, fontFileName);
+
+            if (fs.existsSync(fontSrcPath)) {
+                fs.copyFileSync(fontSrcPath, fontDistPath);
+                console.log(`✅ Copied font: ${fontDistPath}`);
+            }
         }
 
         return { tokens, tokensPath, htmlPath };

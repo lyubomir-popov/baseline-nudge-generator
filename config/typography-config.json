@@ -1,48 +1,87 @@
 {
   "baselineUnit": 0.5,
-  "fontFile": "../fonts/FiraSans-Regular.ttf",
+  "fontFiles": [
+    {
+      "family": "sans",
+      "path": "../fonts/ibm-plex/IBMPlexSans-Regular.woff"
+    },
+    {
+      "family": "serif", 
+      "path": "../fonts/ibm-plex/IBMPlexSerif-Regular.woff"
+    }
+  ],
   "elements": [
     {
       "identifier": "h1",
       "fontSize": 5.25,
       "lineHeight": 10,
-      "spaceAfter": 3
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 700,
+      "fontStyle": "normal"
     },
     {
       "identifier": "h2",
       "fontSize": 3.9375,
       "lineHeight": 8,
-      "spaceAfter": 3
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 600,
+      "fontStyle": "normal"
     },
     {
       "identifier": "h3",
       "fontSize": 3,
       "lineHeight": 6,
-      "spaceAfter": 3
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 500,
+      "fontStyle": "normal"
     },
     {
       "identifier": "h4",
       "fontSize": 2.25,
       "lineHeight": 5,
-      "spaceAfter": 3
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 400,
+      "fontStyle": "normal"
     },
     {
       "identifier": "h5",
       "fontSize": 1.75,
       "lineHeight": 4,
-      "spaceAfter": 3
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 400,
+      "fontStyle": "normal"
     },
     {
       "identifier": "h6",
       "fontSize": 1.3125,
       "lineHeight": 3,
-      "spaceAfter": 3
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 400,
+      "fontStyle": "normal"
     },
     {
       "identifier": "p",
       "fontSize": 1,
       "lineHeight": 3,
-      "spaceAfter": 3
+      "spaceAfter": 3,
+      "fontFamily": "serif",
+      "fontWeight": 400,
+      "fontStyle": "normal"
+    },
+    {
+      "identifier": "blockquote",
+      "fontSize": 1.25,
+      "lineHeight": 4,
+      "spaceAfter": 4,
+      "fontFamily": "serif",
+      "fontWeight": 400,
+      "fontStyle": "italic"
     }
   ]
 }

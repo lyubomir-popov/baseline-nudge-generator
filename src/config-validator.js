@@ -24,28 +24,68 @@ function validateConfig(config, configPath = '') {
         errors.push('baselineUnit must be a positive number');
     }
 
-    if (!config.fontFile) {
-        errors.push('fontFile is required');
-    } else if (typeof config.fontFile !== 'string') {
-        errors.push('fontFile must be a string');
-    } else {
-    // Check if font file exists
-        const fontPath = path.resolve(path.dirname(configPath), config.fontFile);
-        if (!fs.existsSync(fontPath)) {
-            errors.push(`Font file not found: ${config.fontFile} (resolved to: ${fontPath})`);
+    // Font file validation - support both single fontFile and multiple fontFiles
+    if (config.fontFiles) {
+        // New format with multiple font files
+        if (!Array.isArray(config.fontFiles)) {
+            errors.push('fontFiles must be an array');
         } else {
-            // Check font file extension
-            const ext = path.extname(config.fontFile).toLowerCase();
-            const supportedExtensions = ['.woff2', '.woff', '.ttf', '.otf'];
-            if (!supportedExtensions.includes(ext)) {
-                warnings.push(`Font file extension "${ext}" may not be supported. Supported: ${supportedExtensions.join(', ')}`);
+            config.fontFiles.forEach((fontFile, index) => {
+                const prefix = `fontFiles[${index}]`;
+                
+                if (!fontFile.path) {
+                    errors.push(`${prefix}.path is required`);
+                } else if (typeof fontFile.path !== 'string') {
+                    errors.push(`${prefix}.path must be a string`);
+                } else {
+                    // Check if font file exists
+                    const fontPath = path.resolve(path.dirname(configPath), fontFile.path);
+                    if (!fs.existsSync(fontPath)) {
+                        errors.push(`Font file not found: ${fontFile.path} (resolved to: ${fontPath})`);
+                    } else {
+                        // Check font file extension
+                        const ext = path.extname(fontFile.path).toLowerCase();
+                        const supportedExtensions = ['.woff2', '.woff', '.ttf', '.otf'];
+                        if (!supportedExtensions.includes(ext)) {
+                            warnings.push(`Font file extension "${ext}" may not be supported. Supported: ${supportedExtensions.join(', ')}`);
+                        }
+                    }
+                }
+
+                if (!fontFile.family) {
+                    errors.push(`${prefix}.family is required`);
+                } else if (typeof fontFile.family !== 'string') {
+                    errors.push(`${prefix}.family must be a string`);
+                }
+
+
+            });
+        }
+    } else if (config.fontFile) {
+        // Legacy format with single font file
+        if (typeof config.fontFile !== 'string') {
+            errors.push('fontFile must be a string');
+        } else {
+            // Check if font file exists
+            const fontPath = path.resolve(path.dirname(configPath), config.fontFile);
+            if (!fs.existsSync(fontPath)) {
+                errors.push(`Font file not found: ${config.fontFile} (resolved to: ${fontPath})`);
+            } else {
+                // Check font file extension
+                const ext = path.extname(config.fontFile).toLowerCase();
+                const supportedExtensions = ['.woff2', '.woff', '.ttf', '.otf'];
+                if (!supportedExtensions.includes(ext)) {
+                    warnings.push(`Font file extension "${ext}" may not be supported. Supported: ${supportedExtensions.join(', ')}`);
+                }
             }
         }
+    } else {
+        errors.push('Either fontFile (legacy) or fontFiles (new format) is required');
     }
 
     // Elements validation
     if (config.elements) {
-    // New format
+        // New format
         if (!Array.isArray(config.elements)) {
             errors.push('elements must be an array');
         } else {
@@ -79,6 +119,28 @@ function validateConfig(config, configPath = '') {
                     }
                 }
 
+                // Validate fontFamily if fontFiles is used
+                if (config.fontFiles && element.fontFamily) {
+                    const availableFamilies = config.fontFiles.map(f => f.family);
+                    if (!availableFamilies.includes(element.fontFamily)) {
+                        errors.push(`${prefix}.fontFamily "${element.fontFamily}" not found in fontFiles. Available: ${availableFamilies.join(', ')}`);
+                    }
+                }
+
+                // Validate fontWeight if specified
+                if (element.fontWeight !== undefined) {
+                    if (typeof element.fontWeight !== 'number' || element.fontWeight < 100 || element.fontWeight > 900) {
+                        errors.push(`${prefix}.fontWeight must be a number between 100 and 900`);
+                    }
+                }
+
+                // Validate fontStyle if specified
+                if (element.fontStyle !== undefined) {
+                    if (typeof element.fontStyle !== 'string' || !['normal', 'italic'].includes(element.fontStyle)) {
+                        errors.push(`${prefix}.fontStyle must be either 'normal' or 'italic'`);
+                    }
+                }
+
                 // Check if line height is reasonable
                 if (element.fontSize && element.lineHeight && config.baselineUnit) {
                     const lineHeightRem = element.lineHeight * config.baselineUnit;
@@ -92,7 +154,7 @@ function validateConfig(config, configPath = '') {
             });
         }
     } else {
-    // Legacy format validation
+        // Legacy format validation
         const requiredLegacyFields = ['fontSizes', 'lineHeights', 'spAfter'];
         requiredLegacyFields.forEach(field => {
             if (!config[field]) {
