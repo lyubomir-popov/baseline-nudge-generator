@@ -29,6 +29,8 @@ Automatic font metrics reader that generates baseline grid nudges for CSS typogr
 
 ## What's New in This Version
 
+- **🎨 Multi-font support**: Use multiple font families (sans, serif) with different nudge calculations per element
+- **⚖️ Per-element font styling**: Specify `fontFamily`, `fontWeight`, and `fontStyle` for each element
 - **🔧 Fixed critical baseline calculation bug**: Corrected lineGap distribution formula for accurate baseline alignment
 - **📏 Improved baseline offset calculation**: Now properly distributes lineGap above and below text baseline
 - **🎨 Complete typescale support**: Full h1-h6 and paragraph element configuration
@@ -48,7 +50,47 @@ This ensures that lineGap is properly distributed above and below the text basel
 
 ## Configuration Format
 
-The `typography-config.json` file defines your typography scale and baseline grid settings:
+The `typography-config.json` file defines your typography scale and baseline grid settings. Two formats are supported:
+
+### New Multi-Font Format (Recommended)
+
+```json
+{
+  "baselineUnit": 0.5,
+  "fontFiles": [
+    {
+      "family": "sans",
+      "path": "../fonts/IBMPlexSans-Regular.woff"
+    },
+    {
+      "family": "serif",
+      "path": "../fonts/IBMPlexSerif-Regular.woff"
+    }
+  ],
+  "elements": [
+    {
+      "identifier": "h1",
+      "fontSize": 5.25,
+      "lineHeight": 10,
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 700,
+      "fontStyle": "normal"
+    },
+    {
+      "identifier": "p",
+      "fontSize": 1,
+      "lineHeight": 3,
+      "spaceAfter": 3,
+      "fontFamily": "serif",
+      "fontWeight": 400,
+      "fontStyle": "normal"
+    }
+  ]
+}
+```
+
+### Legacy Single-Font Format
 
 ```json
 {
@@ -59,12 +101,6 @@ The `typography-config.json` file defines your typography scale and baseline gri
       "identifier": "h1",
       "fontSize": 5.25,
       "lineHeight": 10,
-      "spaceAfter": 3
-    },
-    {
-      "identifier": "h2",
-      "fontSize": 3.9375,
-      "lineHeight": 8,
       "spaceAfter": 3
     },
     {
@@ -79,6 +115,12 @@ The `typography-config.json` file defines your typography scale and baseline gri
 
 ### Configuration Properties
 
+#### Multi-Font Format
+- **`baselineUnit`** (number): The baseline grid unit in rem. Common values are 0.5rem or 0.25rem.
+- **`fontFiles`** (array): Array of font file definitions with `family` and `path` properties.
+- **`elements`** (array): Array of typography elements to generate.
+
+#### Legacy Single-Font Format
 - **`baselineUnit`** (number): The baseline grid unit in rem. Common values are 0.5rem or 0.25rem.
 - **`fontFile`** (string): Relative path to your font file from the config directory.
 - **`elements`** (array): Array of typography elements to generate.
@@ -87,10 +129,16 @@ The `typography-config.json` file defines your typography scale and baseline gri
 
 Each element in the `elements` array has these properties:
 
+#### Required Properties
 - **`identifier`** (string): Element identifier or CSS class name (e.g., "h1", "p", "caption", ".heading-large").
 - **`fontSize`** (number): Font size in rem units (e.g., 2.5 = 2.5rem).
 - **`lineHeight`** (integer): Number of baseline units for line height (e.g., 5 = 5 × 0.5rem = 2.5rem).
 - **`spaceAfter`** (integer): Number of baseline units for space after the element (e.g., 4 = 4 × 0.5rem = 2rem). Note: The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
+
+#### Optional Properties (Multi-Font Format Only)
+- **`fontFamily`** (string): Font family to use (e.g., "sans", "serif"). Defaults to "sans" if not specified.
+- **`fontWeight`** (number): Font weight (100-900). Defaults to 400 if not specified.
+- **`fontStyle`** (string): Font style ("normal" or "italic"). Defaults to "normal" if not specified.
 
 ### Important: Line Height vs Font Size
 
@@ -120,6 +168,44 @@ Running `baseline-nudges generate config/typography-config.json` creates:
 
 Design tokens with calculated nudge values for each typography element:
 
+#### Multi-Font Format
+```json
+{
+  "baselineUnit": "0.5rem",
+  "fontFiles": [
+    {
+      "family": "sans",
+      "path": "../fonts/IBMPlexSans-Regular.woff"
+    },
+    {
+      "family": "serif",
+      "path": "../fonts/IBMPlexSerif-Regular.woff"
+    }
+  ],
+  "elements": {
+    "h1": {
+      "fontSize": "5.25rem",
+      "lineHeight": "5rem",
+      "fontFamily": "sans",
+      "fontWeight": 700,
+      "fontStyle": "normal",
+      "spaceAfter": "1.5rem",
+      "nudgeTop": "0.48065rem"
+    },
+    "p": {
+      "fontSize": "1rem",
+      "lineHeight": "1.5rem",
+      "fontFamily": "serif",
+      "fontWeight": 400,
+      "fontStyle": "normal",
+      "spaceAfter": "1.5rem",
+      "nudgeTop": "0.375rem"
+    }
+  }
+}
+```
+
+#### Legacy Single-Font Format
 ```json
 {
   "font": "Fira Sans",
@@ -161,6 +247,32 @@ Copy of your font file for the HTML demo to work offline.
 
 Import the tokens into your CSS build process or design system:
 
+### Multi-Font Format
+```javascript
+const tokens = require("./dist/tokens.json");
+
+// Generate CSS
+Object.entries(tokens.elements).forEach(([identifier, element]) => {
+  const nudgeTopValue = parseFloat(element.nudgeTop);
+  const spaceAfterValue = parseFloat(element.spaceAfter);
+  const marginBottom = spaceAfterValue - nudgeTopValue;
+
+  console.log(`
+.${identifier} {
+  font-size: ${element.fontSize};
+  line-height: ${element.lineHeight};
+  font-family: ${element.fontFamily ? `'${element.fontFamily}', sans-serif` : 'inherit'};
+  font-weight: ${element.fontWeight || 400};
+  font-style: ${element.fontStyle || 'normal'};
+  padding-top: ${element.nudgeTop};
+  margin-bottom: ${marginBottom}rem;
+  margin-top: 0;
+}
+  `);
+});
+```
+
+### Legacy Single-Font Format
 ```javascript
 const tokens = require("./dist/tokens.json");
 
@@ -187,6 +299,8 @@ Perfect for design systems that need precise typographic alignment with proper b
 
 ## Key Features
 
+- **🎨 Multi-font support** - Use multiple font families (sans, serif) with different nudge calculations per element
+- **⚖️ Per-element font styling** - Specify `fontFamily`, `fontWeight`, and `fontStyle` for each element
 - **🔧 Corrected baseline calculation** - Fixed critical lineGap distribution bug for accurate alignment
 - **📏 Precise font metrics reading** - Extracts exact metrics from TTF, WOFF, and OTF files
 - **🎨 Complete typescale support** - Full h1-h6 and paragraph element configuration
