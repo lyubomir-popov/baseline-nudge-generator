@@ -3,11 +3,7 @@
   "fontFiles": [
     {
       "family": "sans",
-      "path": "../fonts/ibm-plex/IBMPlexSans-Regular.woff"
-    },
-    {
-      "family": "serif", 
-      "path": "../fonts/ibm-plex/IBMPlexSerif-Regular.woff"
+      "path": "../fonts/FiraSans-Regular.ttf"
     }
   ],
   "elements": [
@@ -70,7 +66,7 @@
       "fontSize": 1,
       "lineHeight": 3,
       "spaceAfter": 3,
-      "fontFamily": "serif",
+      "fontFamily": "sans",
       "fontWeight": 400,
       "fontStyle": "normal"
     },
@@ -79,7 +75,7 @@
       "fontSize": 1.25,
       "lineHeight": 4,
       "spaceAfter": 4,
-      "fontFamily": "serif",
+      "fontFamily": "sans",
       "fontWeight": 400,
       "fontStyle": "italic"
     }

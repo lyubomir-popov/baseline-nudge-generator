@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-01-XX
+
+### Added
+
+- **🎨 Multi-font support**: Use multiple font families (sans, serif) with different nudge calculations per element
+- **⚖️ Per-element font styling**: Specify `fontFamily`, `fontWeight`, and `fontStyle` for each element
+- **🔧 Enhanced token generation**: Tokens now include all font properties (fontStyle, fontWeight, fontFamily)
+- **📏 Improved HTML generation**: CSS now properly applies font family, weight, and style
+- **🔤 Enhanced font name extraction**: More robust font name detection from various font formats
+- **📝 Better configuration format**: New multi-font configuration format with fontFiles array
+- **🎨 Complete typescale support**: Full h1-h6 and paragraph element configuration with font styling
+
+### Changed
+
+- **Token structure**: Tokens now include fontStyle, fontWeight, and fontFamily properties for each element
+- **HTML generation**: CSS rules now include proper font-family, font-weight, and font-style declarations
+- **Configuration format**: Added support for new multi-font format while maintaining backward compatibility
+- **Font metrics handling**: Improved font metrics mapping for multiple font families
+- **Error handling**: Better error messages for font family resolution
+
+### Fixed
+
+- **Font property inheritance**: Fixed font properties not being properly passed through to tokens
+- **CSS generation**: Fixed font properties not being included in generated CSS
+- **Multi-font validation**: Improved validation for multi-font configurations
+
+## [1.3.1] - 2024-XX-XX
+
+### Previous releases
+
+- See git history for changes prior to structured changelog
+
 ## [1.1.0] - 2025-07-15
 
 ### Added
@@ -47,9 +79,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Generated files**: No longer ship fonts, config files, or generated output with npm package
 - **Dev dependencies**: Removed unnecessary development scripts and dependencies
 - **Test artifacts**: Cleaned up temporary test files and outdated scripts
-
-## [1.0.9] - 2024-XX-XX
-
-### Previous releases
-
-- See git history for changes prior to structured changelog
