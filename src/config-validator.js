@@ -2,6 +2,19 @@ const fs = require('fs');
 const path = require('path');
 
 /**
+ * Check if a number is a multiple of 0.5
+ * @param {number} value - Number to check
+ * @returns {boolean} True if the number is a multiple of 0.5
+ */
+function isMultipleOfHalf(value) {
+    if (typeof value !== 'number' || value <= 0) {
+        return false;
+    }
+    // Check if the value is a multiple of 0.5 by multiplying by 2 and checking if it's an integer
+    return Number.isInteger(value * 2);
+}
+
+/**
  * Validate configuration object
  * @param {Object} config - Configuration to validate
  * @param {string} configPath - Path to config file (for relative font file resolution)
@@ -109,13 +122,13 @@ function validateConfig(config, configPath = '') {
 
                 if (element.lineHeight === undefined) {
                     errors.push(`${prefix}.lineHeight is required`);
-                } else if (typeof element.lineHeight !== 'number' || element.lineHeight <= 0 || !Number.isInteger(element.lineHeight)) {
-                    errors.push(`${prefix}.lineHeight must be a positive integer (number of baseline units)`);
+                } else if (!isMultipleOfHalf(element.lineHeight)) {
+                    errors.push(`${prefix}.lineHeight must be a positive number that is a multiple of 0.5 (e.g., 1.0, 1.5, 2.0, 2.5, etc.)`);
                 }
 
                 if (element.spaceAfter !== undefined) {
-                    if (typeof element.spaceAfter !== 'number' || element.spaceAfter <= 0 || !Number.isInteger(element.spaceAfter)) {
-                        errors.push(`${prefix}.spaceAfter must be a positive integer (number of baseline units)`);
+                    if (!isMultipleOfHalf(element.spaceAfter)) {
+                        errors.push(`${prefix}.spaceAfter must be a positive number that is a multiple of 0.5 (e.g., 1.0, 1.5, 2.0, 2.5, etc.)`);
                     }
                 }
 

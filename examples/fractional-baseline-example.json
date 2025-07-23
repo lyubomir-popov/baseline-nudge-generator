@@ -1,0 +1,87 @@
+{
+  "baselineUnit": 0.5,
+  "fontFiles": [
+    {
+      "family": "sans",
+      "path": "fonts/IBMPlexSans-Regular.woff"
+    },
+    {
+      "family": "serif",
+      "path": "fonts/IBMPlexSerif-Regular.woff"
+    }
+  ],
+  "elements": [
+    {
+      "identifier": "h1",
+      "fontSize": 3.0,
+      "lineHeight": 6,
+      "spaceAfter": 5,
+      "fontFamily": "sans",
+      "fontWeight": 700
+    },
+    {
+      "identifier": "h2",
+      "fontSize": 2.25,
+      "lineHeight": 5,
+      "spaceAfter": 4,
+      "fontFamily": "sans",
+      "fontWeight": 600
+    },
+    {
+      "identifier": "h3",
+      "fontSize": 1.75,
+      "lineHeight": 4,
+      "spaceAfter": 3,
+      "fontFamily": "sans",
+      "fontWeight": 600
+    },
+    {
+      "identifier": "h4",
+      "fontSize": 1.5,
+      "lineHeight": 3,
+      "spaceAfter": 2,
+      "fontFamily": "sans",
+      "fontWeight": 500
+    },
+    {
+      "identifier": "h5",
+      "fontSize": 1.25,
+      "lineHeight": 3,
+      "spaceAfter": 2,
+      "fontFamily": "sans",
+      "fontWeight": 500
+    },
+    {
+      "identifier": "h6",
+      "fontSize": 1.125,
+      "lineHeight": 2,
+      "spaceAfter": 1,
+      "fontFamily": "sans",
+      "fontWeight": 500
+    },
+    {
+      "identifier": "p",
+      "fontSize": 1.0,
+      "lineHeight": 2,
+      "spaceAfter": 1,
+      "fontFamily": "serif",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "small",
+      "fontSize": 0.875,
+      "lineHeight": 2,
+      "spaceAfter": 1,
+      "fontFamily": "serif",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "caption",
+      "fontSize": 0.75,
+      "lineHeight": 1,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    }
+  ]
+} 

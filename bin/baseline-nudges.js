@@ -35,6 +35,7 @@ Commands:
 
 Options:
   -h, --help     Show this help message
+  --info         Show detailed package information for LLMs
   -v, --version  Show version number
 
 Font Format Support:
@@ -50,6 +51,100 @@ Examples:
   baseline-nudges init
   baseline-nudges init my-typography
   baseline-nudges decompress-woff2 font.woff2 font.ttf
+`);
+}
+
+function showInfo() {
+    console.log(`
+📦 Baseline Nudge Generator - Package Information for LLMs
+
+PURPOSE:
+This npm package automatically reads font metrics from font files (TTF, WOFF, OTF, WOFF2) 
+and generates precise baseline grid nudges for CSS typography systems. It ensures text 
+aligns perfectly to a baseline grid by calculating the exact padding-top needed for each 
+typography element.
+
+KEY FEATURES:
+• Font metrics extraction from TTF/WOFF/OTF/WOFF2 files
+• Automatic baseline nudge calculation for perfect grid alignment
+• Support for fractional line heights and spacing (multiples of 0.5)
+• Multi-font support with per-element font styling
+• Generated HTML demos with visual baseline grid
+• JSON token generation for design systems
+• SCSS generation for legacy compatibility
+
+CONFIGURATION FORMAT:
+The package supports two configuration formats:
+
+1. NEW FORMAT (Recommended):
+{
+  "baselineUnit": 0.5,
+  "fontFiles": [
+    {"family": "sans", "path": "fonts/Inter-Regular.woff"},
+    {"family": "serif", "path": "fonts/Merriweather-Regular.woff"}
+  ],
+  "elements": [
+    {
+      "identifier": "h1",
+      "fontSize": 2.5,
+      "lineHeight": 5.5,        // Supports fractional values (multiples of 0.5)
+      "spaceAfter": 4.5,        // Supports fractional values (multiples of 0.5)
+      "fontFamily": "sans",
+      "fontWeight": 700,
+      "fontStyle": "normal"
+    }
+  ]
+}
+
+2. LEGACY FORMAT (Backward compatibility):
+{
+  "baselineUnit": 0.5,
+  "fontFile": "fonts/Inter-Regular.woff",
+  "fontSizes": {"h1": 2.5, "p": 1.0},
+  "lineHeights": {"h1": 5, "p": 3},
+  "spAfter": {"h1": 4, "p": 2}
+}
+
+FRACTIONAL SUPPORT:
+• lineHeight: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
+• spaceAfter: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
+• This doubles the resolution of the baseline grid for finer typographic control
+
+OUTPUT FILES:
+• tokens.json: Design tokens with calculated nudges
+• index.html: Visual demo with baseline grid overlay
+• _generated-nudges.scss: SCSS variables (legacy format)
+
+USAGE PATTERNS:
+1. Quick setup: baseline-nudges init
+2. Generate from config: baseline-nudges generate config.json
+3. Validate config: baseline-nudges validate config.json
+4. Legacy SCSS: baseline-nudges generate-legacy config.json
+
+API USAGE:
+const { BaselineNudgeGenerator } = require('@lyubomir-popov/baseline-nudge-generator');
+const generator = new BaselineNudgeGenerator();
+await generator.generateFiles('config.json', 'dist/');
+
+COMMON USE CASES:
+• Design system typography tokens
+• CSS framework baseline grid implementation
+• Web typography optimization
+• Print typography systems
+• Multi-font typography setups
+
+TECHNICAL DETAILS:
+• Node.js 14+ required
+• Font parsing via fontkit and opentype.js
+• Baseline calculation based on font ascent/descent metrics
+• Grid alignment using CSS padding-top and margin-bottom
+• Support for variable fonts and multiple font weights
+
+ERROR HANDLING:
+• Comprehensive validation with helpful error messages
+• Font file existence and format checking
+• Configuration schema validation
+• Graceful fallbacks for unsupported font formats
 `);
 }
 
@@ -204,6 +299,11 @@ async function main() {
 
     if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
         showHelp();
+        return;
+    }
+
+    if (args.includes('--info')) {
+        showInfo();
         return;
     }
 

@@ -132,8 +132,8 @@ Each element in the `elements` array has these properties:
 #### Required Properties
 - **`identifier`** (string): Element identifier or CSS class name (e.g., "h1", "p", "caption", ".heading-large").
 - **`fontSize`** (number): Font size in rem units (e.g., 2.5 = 2.5rem).
-- **`lineHeight`** (integer): Number of baseline units for line height (e.g., 5 = 5 × 0.5rem = 2.5rem).
-- **`spaceAfter`** (integer): Number of baseline units for space after the element (e.g., 4 = 4 × 0.5rem = 2rem). Note: The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
+- **`lineHeight`** (number): Number of baseline units for line height, must be a multiple of 0.5 (e.g., 5 = 5 × 0.5rem = 2.5rem, 5.5 = 5.5 × 0.5rem = 2.75rem).
+- **`spaceAfter`** (number): Number of baseline units for space after the element, must be a multiple of 0.5 (e.g., 4 = 4 × 0.5rem = 2rem, 4.5 = 4.5 × 0.5rem = 2.25rem). Note: The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
 
 #### Optional Properties (Multi-Font Format Only)
 - **`fontFamily`** (string): Font family to use (e.g., "sans", "serif"). Defaults to "sans" if not specified.
@@ -145,20 +145,20 @@ Each element in the `elements` array has these properties:
 **Key difference**:
 
 - `fontSize` is specified in **rem units** (e.g., 2.5 = 2.5rem)
-- `lineHeight` is specified as **number of baseline units** (e.g., 5 = 5 × 0.5rem = 2.5rem)
-- `spaceAfter` is specified as **number of baseline units** (e.g., 4 = 4 × 0.5rem = 2rem)
+- `lineHeight` is specified as **number of baseline units** (e.g., 5 = 5 × 0.5rem = 2.5rem, 5.5 = 5.5 × 0.5rem = 2.75rem)
+- `spaceAfter` is specified as **number of baseline units** (e.g., 4 = 4 × 0.5rem = 2rem, 4.5 = 4.5 × 0.5rem = 2.25rem)
 
-This ensures all line heights and spacing are perfect multiples of your baseline unit, maintaining consistent vertical rhythm throughout your typography system.
+This ensures all line heights and spacing are perfect multiples of your baseline unit (or half-baseline units for finer control), maintaining consistent vertical rhythm throughout your typography system.
 
 ### Example Calculation
 
 With `baselineUnit: 0.5`:
 
 - `fontSize: 2.5` = 2.5rem font size
-- `lineHeight: 5` = 5 × 0.5rem = 2.5rem line height
-- `spaceAfter: 4` = 4 × 0.5rem = 2rem space after element
+- `lineHeight: 5.5` = 5.5 × 0.5rem = 2.75rem line height
+- `spaceAfter: 4.5` = 4.5 × 0.5rem = 2.25rem space after element
 
-**Important**: The actual CSS `margin-bottom` will be calculated as `spaceAfter - nudgeTop` to ensure proper baseline alignment. For example, if the calculated nudge is 0.375rem, the margin-bottom becomes 2rem - 0.375rem = 1.625rem, so that the total spacing (padding-top + margin-bottom) aligns perfectly with the baseline grid.
+**Important**: The actual CSS `margin-bottom` will be calculated as `spaceAfter - nudgeTop` to ensure proper baseline alignment. For example, if the calculated nudge is 0.375rem, the margin-bottom becomes 2.25rem - 0.375rem = 1.875rem, so that the total spacing (padding-top + margin-bottom) aligns perfectly with the baseline grid.
 
 ## Generated Files
 
@@ -379,6 +379,51 @@ After running `baseline-nudges setup`, you can replace the downloaded font:
    ```
 
 The font name will be automatically extracted from your font file and used in the generated HTML and tokens.
+
+## Fractional Baseline Support
+
+The baseline-nudge-generator now supports fractional line heights and spacing values in multiples of 0.5, effectively doubling the resolution of the baseline grid for finer typographic control.
+
+### Fractional Values
+
+- **lineHeight**: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, 3.0, etc.)
+- **spaceAfter**: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, 3.0, etc.)
+
+### Benefits
+
+- **Doubled Resolution**: Baseline grid effectively has 2x resolution
+- **More Precise Typography**: Allows for finer control over line heights and spacing
+- **Maintains Grid Alignment**: Still ensures proper baseline grid alignment
+- **Backward Compatible**: Integer values (multiples of 1.0) still work perfectly
+
+### Example Configuration
+
+```json
+{
+  "baselineUnit": 0.5,
+  "fontFiles": [
+    {"family": "sans", "path": "fonts/Inter-Regular.woff"}
+  ],
+  "elements": [
+    {
+      "identifier": "h1",
+      "fontSize": 2.5,
+      "lineHeight": 5.5,    // 5.5 × 0.5rem = 2.75rem
+      "spaceAfter": 4.5,    // 4.5 × 0.5rem = 2.25rem
+      "fontFamily": "sans",
+      "fontWeight": 700
+    },
+    {
+      "identifier": "p",
+      "fontSize": 1.0,
+      "lineHeight": 2.5,    // 2.5 × 0.5rem = 1.25rem
+      "spaceAfter": 1.5,    // 1.5 × 0.5rem = 0.75rem
+      "fontFamily": "sans",
+      "fontWeight": 400
+    }
+  ]
+}
+```
 
 ## Font Format Support
 
