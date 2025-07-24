@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Font property inheritance**: Fixed font properties not being properly passed through to tokens
 - **CSS generation**: Fixed font properties not being included in generated CSS
 - **Multi-font validation**: Improved validation for multi-font configurations
+- **Output directory handling**: Fixed generator creating files in both specified output directory and dist/ directory
+- **File overwriting**: Fixed issue where multiple config runs would overwrite each other's output files
 
 ## [1.3.1] - 2024-XX-XX
 

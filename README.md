@@ -20,11 +20,16 @@ Automatic font metrics reader that generates baseline grid nudges for CSS typogr
 
    ```bash
    baseline-nudges generate config/typography-config.json
+   baseline-nudges generate config/typography-config.json src/docs
+   baseline-nudges generate config/typography-config.json src/editorial
    ```
 
 4. **View the result:**
    ```bash
    open dist/index.html
+   # Or if you specified a custom output directory:
+   open src/docs/index.html
+   open src/editorial/index.html
    ```
 
 ## What's New in This Version
