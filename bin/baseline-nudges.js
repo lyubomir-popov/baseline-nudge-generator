@@ -15,68 +15,146 @@ function showHelp() {
     console.log(`
 🎯 Baseline Nudge Generator CLI
 
-Usage:
-  baseline-nudges generate <config.json> [output-dir]
-  baseline-nudges generate-legacy <config.json> [output.scss]
-  baseline-nudges watch <config.json> [output.scss]
-  baseline-nudges init [name]
-  baseline-nudges init-legacy [name]
-  baseline-nudges decompress-woff2 <input.woff2> [output.ttf]
+DESCRIPTION:
+Automatically generates precise baseline grid nudges for CSS typography systems by reading 
+font metrics from font files (TTF, WOFF, OTF, WOFF2). Ensures perfect text alignment 
+to a baseline grid by calculating exact padding-top values for each typography element.
 
-Commands:
-  setup           Download font and create working config (recommended first step)
-  init            Complete setup: download font, extract name, create config, generate demo
-  init-manual     Create example configuration file (requires manual font setup)
-  generate        Generate JSON tokens and HTML example from configuration
-  generate-legacy Generate SCSS file from legacy configuration (backward compatibility)
-  watch           Watch legacy configuration file and regenerate on changes
-  validate        Validate configuration file
-  decompress-woff2 Decompress WOFF2 file to TTF for opentype.js compatibility
+USAGE:
+  baseline-nudges <command> [options] [arguments]
 
-Options:
-  -h, --help     Show this help message
-  --info         Show detailed package information for LLMs
-  -v, --version  Show version number
+COMMANDS:
 
-Font Format Support:
-  ✅ TTF (TrueType) - Full support
-  ✅ OTF (OpenType) - Full support
-  ✅ WOFF (Web Open Font Format) - Full support
-  ⚠️  WOFF2 - Automatic decompression to TTF (requires wawoff2)
+📦 Setup & Initialization:
+  setup                    Download font and create working config (recommended first step)
+  init [name]             Complete setup: download font, extract name, create config, generate demo
+  init-legacy [name]      Create legacy configuration file (backward compatibility)
+  init-manual [name]      Create example configuration file (requires manual font setup)
 
-Examples:
-  baseline-nudges generate typography.json
-  baseline-nudges generate typography.json output/
-  baseline-nudges generate-legacy typography.json _nudges.scss
-  baseline-nudges init
-  baseline-nudges init my-typography
-  baseline-nudges decompress-woff2 font.woff2 font.ttf
+🎨 Generation:
+  generate <config.json> [output-dir]     Generate JSON tokens and HTML demo from configuration
+  generate-legacy <config.json> [output.scss]  Generate SCSS file from legacy configuration
+  watch <config.json> [output.scss]       Watch configuration file and regenerate on changes
+
+🔧 Utilities:
+  validate <config.json>                  Validate configuration file
+  decompress-woff2 <input.woff2> [output.ttf]  Decompress WOFF2 file to TTF
+
+OPTIONS:
+  -h, --help              Show this help message
+  --info                  Show detailed package information for LLMs
+  -v, --version           Show version number
+  --parser <parser>       Specify font parser: 'opentype' or 'fontkit' (default: opentype)
+
+FONT FORMAT SUPPORT:
+  ✅ TTF (TrueType)       Full support with metrics extraction
+  ✅ OTF (OpenType)       Full support with metrics extraction  
+  ✅ WOFF (Web Open Font Format)  Full support with metrics extraction
+  ⚠️  WOFF2               Automatic decompression to TTF (requires wawoff2)
+
+CONFIGURATION FORMATS:
+
+1. NEW FORMAT (Recommended):
+   {
+     "baselineUnit": 0.5,
+     "fontFiles": [
+       {"family": "sans", "path": "fonts/Inter-Regular.woff"},
+       {"family": "serif", "path": "fonts/Merriweather-Regular.woff"}
+     ],
+     "elements": [
+       {
+         "identifier": "h1",
+         "fontSize": 2.5,
+         "lineHeight": 5.5,
+         "spaceAfter": 4.5,
+         "fontFamily": "sans",
+         "fontWeight": 700,
+         "fontStyle": "normal"
+       }
+     ]
+   }
+
+2. LEGACY FORMAT (Backward compatibility):
+   {
+     "baselineUnit": 0.5,
+     "fontFile": "fonts/Inter-Regular.woff",
+     "fontSizes": {"h1": 2.5, "p": 1.0},
+     "lineHeights": {"h1": 5, "p": 3},
+     "spAfter": {"h1": 4, "p": 2}
+   }
+
+OUTPUT FILES:
+  • tokens.json           Design tokens with calculated nudges and font properties
+  • index.html           Visual demo with baseline grid overlay and typography examples
+  • _generated-nudges.scss  SCSS variables (legacy format only)
+
+EXAMPLES:
+
+Quick Start:
+  baseline-nudges setup                    # Download font and create config
+  baseline-nudges init                     # Complete setup with demo generation
+  baseline-nudges init my-typography      # Setup with custom name
+
+Generation:
+  baseline-nudges generate config.json                    # Generate to dist/
+  baseline-nudges generate config.json src/docs          # Generate to custom directory
+  baseline-nudges generate config.json src/editorial     # Generate to another directory
+
+Legacy SCSS:
+  baseline-nudges generate-legacy config.json            # Generate SCSS file
+  baseline-nudges generate-legacy config.json _nudges.scss
+
+Validation:
+  baseline-nudges validate config.json                   # Validate configuration
+
+Font Utilities:
+  baseline-nudges decompress-woff2 font.woff2 font.ttf  # Decompress WOFF2
+
+ADVANCED FEATURES:
+
+Multi-Font Support:
+  • Use multiple font families (sans, serif) in single configuration
+  • Different nudge calculations per font family
+  • Per-element font styling (fontFamily, fontWeight, fontStyle)
+
+Fractional Baseline Grid:
+  • lineHeight: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
+  • spaceAfter: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
+  • Doubles resolution for finer typographic control
+
+Output Directory Handling:
+  • Respects specified output directory completely
+  • No overwriting between different config runs
+  • Consistent file placement based on output directory
+
+For detailed technical information, run: baseline-nudges --info
 `);
 }
 
 function showInfo() {
     console.log(`
-📦 Baseline Nudge Generator - Package Information for LLMs
+📦 Baseline Nudge Generator - Comprehensive Package Information for LLMs
 
-PURPOSE:
+PURPOSE & OVERVIEW:
 This npm package automatically reads font metrics from font files (TTF, WOFF, OTF, WOFF2) 
 and generates precise baseline grid nudges for CSS typography systems. It ensures text 
 aligns perfectly to a baseline grid by calculating the exact padding-top needed for each 
-typography element.
+typography element, eliminating the need for manual baseline calculations.
 
-KEY FEATURES:
-• Font metrics extraction from TTF/WOFF/OTF/WOFF2 files
+CORE FUNCTIONALITY:
+• Font metrics extraction from TTF/WOFF/OTF/WOFF2 files using fontkit/opentype.js
 • Automatic baseline nudge calculation for perfect grid alignment
 • Support for fractional line heights and spacing (multiples of 0.5)
-• Multi-font support with per-element font styling
-• Generated HTML demos with visual baseline grid
-• JSON token generation for design systems
+• Multi-font support with per-element font styling (fontFamily, fontWeight, fontStyle)
+• Generated HTML demos with visual baseline grid overlay
+• JSON token generation for design systems integration
 • SCSS generation for legacy compatibility
+• Real-time file watching and regeneration
+• Comprehensive configuration validation
 
-CONFIGURATION FORMAT:
-The package supports two configuration formats:
+CONFIGURATION FORMATS:
 
-1. NEW FORMAT (Recommended):
+1. NEW FORMAT (Recommended - v1.4.0+):
 {
   "baselineUnit": 0.5,
   "fontFiles": [
@@ -89,9 +167,9 @@ The package supports two configuration formats:
       "fontSize": 2.5,
       "lineHeight": 5.5,        // Supports fractional values (multiples of 0.5)
       "spaceAfter": 4.5,        // Supports fractional values (multiples of 0.5)
-      "fontFamily": "sans",
-      "fontWeight": 700,
-      "fontStyle": "normal"
+      "fontFamily": "sans",     // References fontFiles family
+      "fontWeight": 700,        // CSS font-weight value
+      "fontStyle": "normal"     // "normal" or "italic"
     }
   ]
 }
@@ -105,46 +183,195 @@ The package supports two configuration formats:
   "spAfter": {"h1": 4, "p": 2}
 }
 
-FRACTIONAL SUPPORT:
-• lineHeight: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
-• spaceAfter: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
-• This doubles the resolution of the baseline grid for finer typographic control
+ADVANCED FEATURES:
+
+Multi-Font Support:
+• Use multiple font families (sans, serif) in single configuration
+• Different nudge calculations per font family based on unique metrics
+• Per-element font styling with fontFamily, fontWeight, fontStyle properties
+• Automatic font family resolution and CSS generation
+
+Fractional Baseline Grid:
+• lineHeight: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
+• spaceAfter: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
+• Doubles resolution for finer typographic control
+• Maintains perfect baseline alignment with fractional values
+
+Output Directory Handling:
+• Respects specified output directory completely
+• No overwriting between different config runs
+• Consistent file placement based on output directory
+• Supports multiple simultaneous generations to different directories
+
+Font Format Support:
+• TTF (TrueType): Full support with metrics extraction
+• OTF (OpenType): Full support with metrics extraction
+• WOFF (Web Open Font Format): Full support with metrics extraction
+• WOFF2: Automatic decompression to TTF (requires wawoff2 dependency)
 
 OUTPUT FILES:
-• tokens.json: Design tokens with calculated nudges
-• index.html: Visual demo with baseline grid overlay
-• _generated-nudges.scss: SCSS variables (legacy format)
 
-USAGE PATTERNS:
-1. Quick setup: baseline-nudges init
-2. Generate from config: baseline-nudges generate config.json
-3. Validate config: baseline-nudges validate config.json
-4. Legacy SCSS: baseline-nudges generate-legacy config.json
+tokens.json:
+{
+  "h1": {
+    "fontSize": 2.5,
+    "lineHeight": 5.5,
+    "spaceAfter": 4.5,
+    "nudge": 0.125,
+    "fontFamily": "sans",
+    "fontWeight": 700,
+    "fontStyle": "normal"
+  }
+}
+
+index.html:
+• Visual demo with baseline grid overlay
+• Typography examples for all configured elements
+• CSS with calculated nudges and font properties
+• Responsive design with proper font loading
+
+_generated-nudges.scss (legacy only):
+• SCSS variables for legacy integration
+• Compatible with existing SCSS workflows
+
+CLI COMMANDS:
+
+Setup & Initialization:
+• setup: Download font and create working config
+• init [name]: Complete setup with demo generation
+• init-legacy [name]: Create legacy configuration
+• init-manual [name]: Create example config (manual font setup)
+
+Generation:
+• generate <config.json> [output-dir]: Generate JSON tokens and HTML demo
+• generate-legacy <config.json> [output.scss]: Generate SCSS file
+• watch <config.json> [output.scss]: Watch and regenerate on changes
+
+Utilities:
+• validate <config.json>: Validate configuration file
+• decompress-woff2 <input.woff2> [output.ttf]: Decompress WOFF2 file
 
 API USAGE:
+
+Basic Usage:
 const { BaselineNudgeGenerator } = require('@lyubomir-popov/baseline-nudge-generator');
 const generator = new BaselineNudgeGenerator();
 await generator.generateFiles('config.json', 'dist/');
 
+Advanced Usage:
+const generator = new BaselineNudgeGenerator(null, 'fontkit'); // Specify parser
+await generator.generateFiles('config.json', 'src/docs/');
+
+Token Generation:
+const tokens = await generator.generateTokens('config.json');
+console.log(tokens.h1.nudge); // Access calculated nudge
+
 COMMON USE CASES:
-• Design system typography tokens
-• CSS framework baseline grid implementation
-• Web typography optimization
-• Print typography systems
-• Multi-font typography setups
+
+Design Systems:
+• Generate typography tokens for design system integration
+• Maintain consistent baseline grid across components
+• Support multiple font families with different metrics
+
+CSS Frameworks:
+• Implement baseline grid in CSS frameworks
+• Generate SCSS variables for existing workflows
+• Provide fractional baseline support for fine control
+
+Web Typography:
+• Optimize typography for web applications
+• Ensure perfect baseline alignment across browsers
+• Support responsive typography with consistent grids
+
+Print Typography:
+• Generate precise typography for print layouts
+• Maintain baseline grid in print CSS
+• Support multiple font weights and styles
+
+Multi-Font Setups:
+• Handle complex typography with multiple font families
+• Calculate different nudges per font family
+• Maintain consistent spacing across font changes
 
 TECHNICAL DETAILS:
-• Node.js 14+ required
-• Font parsing via fontkit and opentype.js
-• Baseline calculation based on font ascent/descent metrics
-• Grid alignment using CSS padding-top and margin-bottom
-• Support for variable fonts and multiple font weights
 
-ERROR HANDLING:
-• Comprehensive validation with helpful error messages
-• Font file existence and format checking
-• Configuration schema validation
-• Graceful fallbacks for unsupported font formats
+Dependencies:
+• Node.js 14+ required
+• fontkit: Primary font parsing library
+• opentype.js: Alternative font parser
+• wawoff2: WOFF2 decompression (optional)
+
+Font Parsing:
+• Extracts ascent, descent, and baseline metrics
+• Supports variable fonts and multiple weights
+• Handles font format detection automatically
+• Provides fallback for unsupported formats
+
+Baseline Calculation:
+• Calculates nudge based on font ascent/descent
+• Ensures text aligns to baseline grid
+• Supports fractional baseline units (0.5x resolution)
+• Maintains consistency across font changes
+
+CSS Generation:
+• Generates padding-top for baseline alignment
+• Includes font-family, font-weight, font-style
+• Provides margin-bottom for spacing
+• Creates responsive and accessible CSS
+
+ERROR HANDLING & VALIDATION:
+
+Configuration Validation:
+• Schema validation for both formats
+• Font file existence checking
+• Font format compatibility verification
+• Helpful error messages with suggestions
+
+Font Processing:
+• Graceful fallbacks for unsupported formats
+• Automatic WOFF2 decompression when possible
+• Font name extraction and validation
+• Metrics extraction error handling
+
+File System:
+• Output directory creation and validation
+• File writing error handling
+• Path resolution and validation
+• Cross-platform compatibility
+
+PERFORMANCE & OPTIMIZATION:
+
+Font Processing:
+• Efficient font parsing with minimal memory usage
+• Caching of font metrics for repeated use
+• Optimized file I/O operations
+• Background processing for large font files
+
+Generation:
+• Fast token generation for design systems
+• Optimized HTML/CSS output
+• Minimal file size for generated assets
+• Efficient file watching for development
+
+COMPATIBILITY:
+
+Browser Support:
+• Generated CSS works in all modern browsers
+• Font loading optimization for web use
+• Fallback font handling
+• Responsive design support
+
+Framework Integration:
+• Compatible with React, Vue, Angular, etc.
+• SCSS integration for existing workflows
+• JSON tokens for design system tools
+• CSS-in-JS framework support
+
+Version Compatibility:
+• Backward compatibility with legacy format
+• Migration path from legacy to new format
+• Deprecation warnings for legacy features
+• Future-proof API design
 `);
 }
 
