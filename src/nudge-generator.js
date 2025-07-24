@@ -709,31 +709,3 @@ Please ensure your font file is in the same directory as your config file.`, con
 }
 
 module.exports = { BaselineNudgeGenerator };
-
-// CLI handling
-if (require.main === module) {
-    const args = process.argv.slice(2);
-
-    if (args.length === 0) {
-        console.log('Usage: node nudge-generator.js <config-file> [output-dir]');
-        console.log('');
-        console.log('Examples:');
-        console.log('  node nudge-generator.js config.json');
-        console.log('  node nudge-generator.js config.json output/');
-        process.exit(1);
-    }
-
-    const configFile = args[0];
-    const outputDir = args[1] || '.';
-
-    const generator = new BaselineNudgeGenerator();
-
-    generator.generateFiles(configFile, outputDir)
-        .then(() => {
-            console.log('🎉 Generation complete!');
-        })
-        .catch(error => {
-            console.error('❌ Error:', error.message);
-            process.exit(1);
-        });
-}
