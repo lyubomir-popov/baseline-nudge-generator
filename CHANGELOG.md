@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-01-24
+
+### Changed
+
+- **spaceAfter behavior**: When `spaceAfter` is set to 0, it is now treated as 0.5 baseline units for spacing purposes
+- **Margin-bottom calculation**: For `spaceAfter: 0`, margin-bottom is calculated as `0.5 - nudgeTop` instead of `0 - nudgeTop`
+- **Documentation updates**: Updated README and CLI help to clarify the new spaceAfter behavior
+- **Code cleanup**: Removed unused examples folder and old generated files
+
+### Fixed
+
+- **Negative margin-bottom values**: Fixed issue where `spaceAfter: 0` would result in negative margin-bottom values
+- **Baseline grid drift**: Ensured minimum spacing of 0.5 baseline units to prevent grid drift
+- **Consistent spacing**: All elements now have consistent minimum spacing even when spaceAfter is 0
+
 ## [1.4.1] - 2025-01-24
 
 ### Added
