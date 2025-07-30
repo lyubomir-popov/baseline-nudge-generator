@@ -157,7 +157,7 @@ class BaselineNudgeGenerator {
                 // Create a temporary instance with the specific font metrics for calculation
                 const tempGenerator = new BaselineNudgeGenerator(fontMetrics);
                 const nudgeTop = tempGenerator.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
-                const spaceAfterRem = (spaceAfter || 4) * baselineUnit; // Default to 4 baseline units if not specified
+                const spaceAfterRem = (spaceAfter !== undefined ? spaceAfter : 4) * baselineUnit; // Default to 4 baseline units if not specified
 
                 // Use identifier if available, otherwise use classname (backward compatibility), otherwise use tag, otherwise fallback to 'element'
                 const elementName = identifier || classname || tag || 'element';
@@ -190,7 +190,7 @@ class BaselineNudgeGenerator {
                 const fontSizeRem = fontSize;
                 const lineHeightRem = lineHeight;
                 const nudgeTop = this.calculateNudgeRem(fontSizeRem, lineHeightRem, baselineUnit);
-                const spaceAfterRem = (spaceAfter || 4) * baselineUnit; // Default to 4 baseline units if not specified
+                const spaceAfterRem = (spaceAfter !== undefined ? spaceAfter : 4) * baselineUnit; // Default to 4 baseline units if not specified
 
                 // Use identifier if available, otherwise use classname (backward compatibility), otherwise use tag, otherwise fallback to 'element'
                 const elementName = identifier || classname || tag || 'element';
@@ -315,7 +315,17 @@ body.u-baseline-grid::after {
         for (const [identifier, props] of Object.entries(elements)) {
             const nudgeTopValue = parseFloat(props.nudgeTop);
             const spaceAfterValue = parseFloat(props.spaceAfter);
-            const marginBottom = spaceAfterValue - nudgeTopValue;
+            let marginBottom;
+            
+            // Special handling for spaceAfter = 0: change to 0.5rem
+            let adjustedSpaceAfter = spaceAfterValue;
+            if (spaceAfterValue === 0) {
+                adjustedSpaceAfter = 0.5;
+            }
+            
+            // Calculate margin-bottom to ensure total spacing equals spaceAfter
+            // Total spacing = padding-top + margin-bottom = spaceAfter
+            marginBottom = adjustedSpaceAfter - nudgeTopValue;
 
             if (isMultiFont) {
                 // New format with font family, weight, and style

@@ -97,8 +97,7 @@ Quick Start:
 
 Generation:
   baseline-nudges generate config.json                    # Generate to dist/
-  baseline-nudges generate config.json src/docs          # Generate to custom directory
-  baseline-nudges generate config.json src/editorial     # Generate to another directory
+  baseline-nudges generate config.json custom-output     # Generate to custom directory
 
 Legacy SCSS:
   baseline-nudges generate-legacy config.json            # Generate SCSS file
@@ -118,9 +117,9 @@ Multi-Font Support:
   • Per-element font styling (fontFamily, fontWeight, fontStyle)
 
 Fractional Baseline Grid:
-  • lineHeight: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
-  • spaceAfter: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
-  • Doubles resolution for finer typographic control
+  • lineHeight: Supports multiples of 0.25 (1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, etc.)
+  • spaceAfter: Supports 0 or multiples of 0.25 (0, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, etc.). If set to 0, it is treated as 0.5 baseline units for spacing.
+  • Quadruples resolution for finer typographic control
 
 Output Directory Handling:
   • Respects specified output directory completely
@@ -144,7 +143,8 @@ typography element, eliminating the need for manual baseline calculations.
 CORE FUNCTIONALITY:
 • Font metrics extraction from TTF/WOFF/OTF/WOFF2 files using fontkit/opentype.js
 • Automatic baseline nudge calculation for perfect grid alignment
-• Support for fractional line heights and spacing (multiples of 0.5)
+• Support for fractional line heights and spacing (multiples of 0.25, spaceAfter can be 0)
+• If spaceAfter is set to 0, it is treated as 0.5 baseline units for spacing
 • Multi-font support with per-element font styling (fontFamily, fontWeight, fontStyle)
 • Generated HTML demos with visual baseline grid overlay
 • JSON token generation for design systems integration
@@ -165,8 +165,8 @@ CONFIGURATION FORMATS:
     {
       "identifier": "h1",
       "fontSize": 2.5,
-      "lineHeight": 5.5,        // Supports fractional values (multiples of 0.5)
-      "spaceAfter": 4.5,        // Supports fractional values (multiples of 0.5)
+      "lineHeight": 5.25,       // Supports fractional values (multiples of 0.25)
+      "spaceAfter": 4.25,       // Supports fractional values (multiples of 0.25, can be 0)
       "fontFamily": "sans",     // References fontFiles family
       "fontWeight": 700,        // CSS font-weight value
       "fontStyle": "normal"     // "normal" or "italic"
@@ -192,9 +192,9 @@ Multi-Font Support:
 • Automatic font family resolution and CSS generation
 
 Fractional Baseline Grid:
-• lineHeight: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
-• spaceAfter: Supports multiples of 0.5 (1.0, 1.5, 2.0, 2.5, etc.)
-• Doubles resolution for finer typographic control
+• lineHeight: Supports multiples of 0.25 (1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, etc.)
+• spaceAfter: Supports multiples of 0.25 (1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, etc.)
+• Quadruples resolution for finer typographic control
 • Maintains perfect baseline alignment with fractional values
 
 Output Directory Handling:
@@ -260,7 +260,7 @@ await generator.generateFiles('config.json', 'dist/');
 
 Advanced Usage:
 const generator = new BaselineNudgeGenerator(null, 'fontkit'); // Specify parser
-await generator.generateFiles('config.json', 'src/docs/');
+await generator.generateFiles('config.json', 'custom-output/');
 
 Token Generation:
 const tokens = await generator.generateTokens('config.json');

@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **🔤 Enhanced font name extraction**: More robust font name detection from various font formats
 - **📝 Better configuration format**: New multi-font configuration format with fontFiles array
 - **🎨 Complete typescale support**: Full h1-h6 and paragraph element configuration with font styling
-- **📐 Fractional baseline support**: Support for fractional line heights and spacing values in multiples of 0.5 (e.g., 1.5, 2.5, 3.0) for doubled baseline grid resolution
+- **📐 Fractional baseline support**: Support for fractional line heights and spacing values in multiples of 0.25 (e.g., 1.25, 1.5, 1.75, 2.25, 2.5, 2.75, 3.0) for quadrupled baseline grid resolution
 
 ### Changed
 
@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration format**: Added support for new multi-font format while maintaining backward compatibility
 - **Font metrics handling**: Improved font metrics mapping for multiple font families
 - **Error handling**: Better error messages for font family resolution
-- **Validation**: LineHeight and spaceAfter now support fractional values that are multiples of 0.5 for finer typographic control
+- **Validation**: LineHeight and spaceAfter now support fractional values that are multiples of 0.25 for finer typographic control
 
 ### Fixed
 
@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Error messages**: More user-friendly error messages with context and suggestions
 - **Code structure**: Better separation of concerns between CLI, validation, and core logic
 - **Package scripts**: Simplified scripts, removed dev dependencies
-- **Validation**: LineHeight validation now ensures positive numbers that are multiples of 0.5 (baseline unit multiples)
+- **Validation**: LineHeight validation now ensures positive numbers that are multiples of 0.25 (baseline unit multiples)
 
 ### Fixed
 

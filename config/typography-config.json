@@ -8,76 +8,140 @@
   ],
   "elements": [
     {
-      "identifier": "h1",
-      "fontSize": 5.25,
-      "lineHeight": 10,
-      "spaceAfter": 3,
+      "identifier": "dimension-size-fontSize-200",
+      "fontSize": 0.625,
+      "lineHeight": 1.5,
+      "spaceAfter": 0,
       "fontFamily": "sans",
-      "fontWeight": 700,
-      "fontStyle": "normal"
+      "fontWeight": 400
     },
     {
-      "identifier": "h2",
-      "fontSize": 3.9375,
-      "lineHeight": 8,
-      "spaceAfter": 3,
+      "identifier": "dimension-size-fontSize-250",
+      "fontSize": 0.75,
+      "lineHeight": 2,
+      "spaceAfter": 0,
       "fontFamily": "sans",
-      "fontWeight": 600,
-      "fontStyle": "normal"
+      "fontWeight": 400
     },
     {
-      "identifier": "h3",
-      "fontSize": 3,
-      "lineHeight": 6,
-      "spaceAfter": 3,
+      "identifier": "dimension-size-fontSize-300",
+      "fontSize": 0.875,
+      "lineHeight": 2.5,
+      "spaceAfter": 0,
       "fontFamily": "sans",
-      "fontWeight": 500,
-      "fontStyle": "normal"
+      "fontWeight": 400
     },
     {
-      "identifier": "h4",
-      "fontSize": 2.25,
-      "lineHeight": 5,
-      "spaceAfter": 3,
-      "fontFamily": "sans",
-      "fontWeight": 400,
-      "fontStyle": "normal"
-    },
-    {
-      "identifier": "h5",
-      "fontSize": 1.75,
-      "lineHeight": 4,
-      "spaceAfter": 3,
-      "fontFamily": "sans",
-      "fontWeight": 400,
-      "fontStyle": "normal"
-    },
-    {
-      "identifier": "h6",
-      "fontSize": 1.3125,
-      "lineHeight": 3,
-      "spaceAfter": 3,
-      "fontFamily": "sans",
-      "fontWeight": 400,
-      "fontStyle": "normal"
-    },
-    {
-      "identifier": "p",
+      "identifier": "dimension-size-fontSize-350",
       "fontSize": 1,
       "lineHeight": 3,
-      "spaceAfter": 3,
+      "spaceAfter": 0,
       "fontFamily": "sans",
-      "fontWeight": 400,
-      "fontStyle": "normal"
+      "fontWeight": 400
     },
     {
-      "identifier": "blockquote",
-      "fontSize": 1.25,
-      "lineHeight": 4,
-      "spaceAfter": 4,
+      "identifier": "dimension-size-fontSize-400",
+      "fontSize": 1.125,
+      "lineHeight": 3,
+      "spaceAfter": 0,
       "fontFamily": "sans",
-      "fontWeight": 400,
-      "fontStyle": "italic"
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-450",
+      "fontSize": 1.3125,
+      "lineHeight": 3.5,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-500",
+      "fontSize": 1.5,
+      "lineHeight": 4,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-550",
+      "fontSize": 1.75,
+      "lineHeight": 4.5,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-600",
+      "fontSize": 2,
+      "lineHeight": 5,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-650",
+      "fontSize": 2.25,
+      "lineHeight": 5.5,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-700",
+      "fontSize": 2.625,
+      "lineHeight": 6,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-750",
+      "fontSize": 3,
+      "lineHeight": 7,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-800",
+      "fontSize": 3.4375,
+      "lineHeight": 8,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-850",
+      "fontSize": 3.9375,
+      "lineHeight": 9,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-900",
+      "fontSize": 4.5625,
+      "lineHeight": 10,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-950",
+      "fontSize": 5.25,
+      "lineHeight": 11.5,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
+    },
+    {
+      "identifier": "dimension-size-fontSize-1000",
+      "fontSize": 6,
+      "lineHeight": 13,
+      "spaceAfter": 0,
+      "fontFamily": "sans",
+      "fontWeight": 400
     }
   ]
 }

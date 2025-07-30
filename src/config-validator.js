@@ -2,16 +2,29 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Check if a number is a multiple of 0.5
+ * Check if a number is a multiple of 0.25
  * @param {number} value - Number to check
- * @returns {boolean} True if the number is a multiple of 0.5
+ * @returns {boolean} True if the number is a multiple of 0.25
  */
-function isMultipleOfHalf(value) {
+function isMultipleOfQuarter(value) {
     if (typeof value !== 'number' || value <= 0) {
         return false;
     }
-    // Check if the value is a multiple of 0.5 by multiplying by 2 and checking if it's an integer
-    return Number.isInteger(value * 2);
+    // Check if the value is a multiple of 0.25 by multiplying by 4 and checking if it's an integer
+    return Number.isInteger(value * 4);
+}
+
+/**
+ * Check if a number is 0 or a multiple of 0.25 (for spaceAfter validation)
+ * @param {number} value - Number to check
+ * @returns {boolean} True if the number is 0 or a multiple of 0.25
+ */
+function isZeroOrMultipleOfQuarter(value) {
+    if (typeof value !== 'number' || value < 0) {
+        return false;
+    }
+    // Allow 0 or check if the value is a multiple of 0.25
+    return value === 0 || Number.isInteger(value * 4);
 }
 
 /**
@@ -122,13 +135,13 @@ function validateConfig(config, configPath = '') {
 
                 if (element.lineHeight === undefined) {
                     errors.push(`${prefix}.lineHeight is required`);
-                } else if (!isMultipleOfHalf(element.lineHeight)) {
-                    errors.push(`${prefix}.lineHeight must be a positive number that is a multiple of 0.5 (e.g., 1.0, 1.5, 2.0, 2.5, etc.)`);
+                } else if (!isMultipleOfQuarter(element.lineHeight)) {
+                    errors.push(`${prefix}.lineHeight must be a positive number that is a multiple of 0.25 (e.g., 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, etc.)`);
                 }
 
                 if (element.spaceAfter !== undefined) {
-                    if (!isMultipleOfHalf(element.spaceAfter)) {
-                        errors.push(`${prefix}.spaceAfter must be a positive number that is a multiple of 0.5 (e.g., 1.0, 1.5, 2.0, 2.5, etc.)`);
+                    if (!isZeroOrMultipleOfQuarter(element.spaceAfter)) {
+                        errors.push(`${prefix}.spaceAfter must be 0 or a positive number that is a multiple of 0.25 (e.g., 0, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, etc.)`);
                     }
                 }
 

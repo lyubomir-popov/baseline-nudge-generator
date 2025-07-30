@@ -20,16 +20,14 @@ Automatic font metrics reader that generates baseline grid nudges for CSS typogr
 
    ```bash
    baseline-nudges generate config/typography-config.json
-   baseline-nudges generate config/typography-config.json src/docs
-   baseline-nudges generate config/typography-config.json src/editorial
+   baseline-nudges generate config/typography-config.json custom-output
    ```
 
 4. **View the result:**
    ```bash
    open dist/index.html
    # Or if you specified a custom output directory:
-   open src/docs/index.html
-   open src/editorial/index.html
+   open custom-output/index.html
    ```
 
 ## What's New in This Version
@@ -137,8 +135,8 @@ Each element in the `elements` array has these properties:
 #### Required Properties
 - **`identifier`** (string): Element identifier or CSS class name (e.g., "h1", "p", "caption", ".heading-large").
 - **`fontSize`** (number): Font size in rem units (e.g., 2.5 = 2.5rem).
-- **`lineHeight`** (number): Number of baseline units for line height, must be a multiple of 0.5 (e.g., 5 = 5 × 0.5rem = 2.5rem, 5.5 = 5.5 × 0.5rem = 2.75rem).
-- **`spaceAfter`** (number): Number of baseline units for space after the element, must be a multiple of 0.5 (e.g., 4 = 4 × 0.5rem = 2rem, 4.5 = 4.5 × 0.5rem = 2.25rem). Note: The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
+- **`lineHeight`** (number): Number of baseline units for line height, must be a multiple of 0.25 (e.g., 5 = 5 × 0.5rem = 2.5rem, 5.25 = 5.25 × 0.5rem = 2.625rem).
+- **`spaceAfter`** (number): Number of baseline units for space after the element, must be 0 or a multiple of 0.25 (e.g., 0 = no space, 4 = 4 × 0.5rem = 2rem, 4.25 = 4.25 × 0.5rem = 2.125rem). **Note:** If `spaceAfter` is set to `0`, it will be treated as `0.5` baseline units for spacing purposes. The actual CSS margin-bottom will be adjusted by subtracting the baseline nudge (padding-top) to ensure that nudge + spaceAfter equals an exact multiple of the baseline unit.
 
 #### Optional Properties (Multi-Font Format Only)
 - **`fontFamily`** (string): Font family to use (e.g., "sans", "serif"). Defaults to "sans" if not specified.
@@ -164,6 +162,7 @@ With `baselineUnit: 0.5`:
 - `spaceAfter: 4.5` = 4.5 × 0.5rem = 2.25rem space after element
 
 **Important**: The actual CSS `margin-bottom` will be calculated as `spaceAfter - nudgeTop` to ensure proper baseline alignment. For example, if the calculated nudge is 0.375rem, the margin-bottom becomes 2.25rem - 0.375rem = 1.875rem, so that the total spacing (padding-top + margin-bottom) aligns perfectly with the baseline grid.
+**Special case:** If `spaceAfter` is `0`, it is treated as `0.5` baseline units for spacing, so the margin-bottom is calculated as `0.5 - nudgeTop`.
 
 ## Generated Files
 
@@ -387,12 +386,12 @@ The font name will be automatically extracted from your font file and used in th
 
 ## Fractional Baseline Support
 
-The baseline-nudge-generator now supports fractional line heights and spacing values in multiples of 0.5, effectively doubling the resolution of the baseline grid for finer typographic control.
+The baseline-nudge-generator now supports fractional line heights and spacing values in multiples of 0.25, effectively quadrupling the resolution of the baseline grid for finer typographic control.
 
 ### Fractional Values
 
-- **lineHeight**: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, 3.0, etc.)
-- **spaceAfter**: Must be multiples of 0.5 (1.0, 1.5, 2.0, 2.5, 3.0, etc.)
+- **lineHeight**: Must be multiples of 0.25 (1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, etc.)
+- **spaceAfter**: Must be 0 or multiples of 0.25 (0, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, etc.). **If set to 0, it is treated as 0.5 baseline units for spacing.**
 
 ### Benefits
 
